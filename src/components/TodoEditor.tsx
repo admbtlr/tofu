@@ -4,7 +4,7 @@ import { validateTodoNotes, validateTodoTitle } from '@/utils/validators';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
-import { Button, Surface, Text, TextInput, useTheme } from 'react-native-paper';
+import { Button, Surface, Text, TextInput, useTheme, Switch } from 'react-native-paper';
 
 const BORDER_RADIUS = 12;
 
@@ -35,6 +35,14 @@ export default function TodoEditor({
     }
     return null;
   });
+  const [includeTime, setIncludeTime] = useState<boolean>(() => {
+    if (todo?.dueDate) {
+      const date = new Date(todo.dueDate);
+      // Check if time is set (not midnight)
+      return date.getHours() !== 0 || date.getMinutes() !== 0;
+    }
+    return false;
+  });
   const [titleError, setTitleError] = useState<string | null>(null);
   const [notesError, setNotesError] = useState<string | null>(null);
 
@@ -57,10 +65,17 @@ export default function TodoEditor({
       return;
     }
 
+    let finalDueDate = dueDate;
+    if (dueDate && !includeTime) {
+      // If time is not included, set to start of day
+      finalDueDate = new Date(dueDate);
+      finalDueDate.setHours(0, 0, 0, 0);
+    }
+
     onSave({
       title: title.trim(),
       notes: notes.trim() || undefined,
-      dueDate: dueDate ? createDateString(dueDate) : undefined,
+      dueDate: finalDueDate ? createDateString(finalDueDate) : undefined,
     });
   };
 
@@ -69,10 +84,27 @@ export default function TodoEditor({
     today.setHours(0, 0, 0, 0);
 
     if (selectedDate >= today) {
-      setDueDate(selectedDate);
+      // Preserve the existing time if includeTime is enabled
+      if (includeTime && dueDate) {
+        const newDate = new Date(selectedDate);
+        newDate.setHours(dueDate.getHours());
+        newDate.setMinutes(dueDate.getMinutes());
+        newDate.setSeconds(0);
+        newDate.setMilliseconds(0);
+        setDueDate(newDate);
+      } else {
+        setDueDate(selectedDate);
+      }
     } else {
       // If somehow a past date is selected, set to today
-      setDueDate(new Date());
+      const newDate = new Date();
+      if (includeTime && dueDate) {
+        newDate.setHours(dueDate.getHours());
+        newDate.setMinutes(dueDate.getMinutes());
+      }
+      newDate.setSeconds(0);
+      newDate.setMilliseconds(0);
+      setDueDate(newDate);
     }
   };
 
@@ -147,6 +179,53 @@ export default function TodoEditor({
               accentColor={theme.colors.primary}
             />
           </View>
+
+          <View style={styles.timeToggleContainer}>
+            <Text variant="bodyMedium">Include time</Text>
+            <Switch
+              value={includeTime}
+              onValueChange={(value) => {
+                setIncludeTime(value);
+                if (value) {
+                  // If enabling time and no date is set, set to today
+                  if (!dueDate) {
+                    const today = new Date();
+                    today.setHours(9, 0, 0, 0);
+                    setDueDate(today);
+                  } else {
+                    // Set default time to 9:00 AM if enabling time
+                    const newDate = new Date(dueDate);
+                    if (newDate.getHours() === 0 && newDate.getMinutes() === 0) {
+                      newDate.setHours(9, 0, 0, 0);
+                      setDueDate(newDate);
+                    }
+                  }
+                }
+              }}
+            />
+          </View>
+
+          {includeTime && (
+            <View style={styles.datePickerContainer}>
+              <DateTimePicker
+                value={dueDate || new Date()}
+                mode="time"
+                display="spinner"
+                onChange={(_, selectedTime) => {
+                  if (selectedTime) {
+                    // Use existing dueDate or today if no date is set
+                    const baseDate = dueDate || new Date();
+                    const newDate = new Date(baseDate);
+                    newDate.setHours(selectedTime.getHours());
+                    newDate.setMinutes(selectedTime.getMinutes());
+                    setDueDate(newDate);
+                  }
+                }}
+                textColor={theme.colors.onSurface}
+                accentColor={theme.colors.primary}
+              />
+            </View>
+          )}
         </Surface>
       </ScrollView>
 
@@ -211,6 +290,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: 180,
     borderRadius: BORDER_RADIUS,
+  },
+  timeToggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginTop: 8,
   },
   dateSpinner: {
     width: '100%',

@@ -37,7 +37,18 @@ export const formatDateTime = (dateString: string): string => {
 
 export const isOverdue = (dateString: string): boolean => {
   const date = parseISO(dateString);
-  return isPast(date) && !isToday(date);
+  const now = new Date();
+
+  // Check if the date has a specific time set (not midnight)
+  const hasTime = date.getHours() !== 0 || date.getMinutes() !== 0;
+
+  if (hasTime) {
+    // If time is set, check if the exact datetime has passed
+    return date.getTime() < now.getTime();
+  } else {
+    // If no time is set, use the original logic (past day but not today)
+    return isPast(date) && !isToday(date);
+  }
 };
 
 export const createDateString = (date: Date): string => {

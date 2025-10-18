@@ -1,6 +1,6 @@
 import { useTodoStore } from '@/store/useTodoStore';
 import { Todo } from '@/types/todo';
-import { formatDate, isOverdue } from '@/utils/date';
+import { formatDate, formatTime, isOverdue } from '@/utils/date';
 import React, { useEffect } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
@@ -90,6 +90,20 @@ export default React.memo(function TodoItem({
   const isItemOverdue =
     todo.dueDate && !todo.completed && isOverdue(todo.dueDate);
 
+  // Check if the due date has a specific time set (not midnight)
+  const hasTime = todo.dueDate ? (() => {
+    const date = new Date(todo.dueDate);
+    return date.getHours() !== 0 || date.getMinutes() !== 0;
+  })() : false;
+
+  const formatDueDate = (dateString: string) => {
+    const formattedDate = formatDate(dateString);
+    if (hasTime) {
+      return `${formattedDate} at ${formatTime(dateString)}`;
+    }
+    return formattedDate;
+  };
+
   return (
     <Animated.View style={animatedStyle}>
       <Swipeable
@@ -120,7 +134,7 @@ export default React.memo(function TodoItem({
                     isItemOverdue && { color: theme.colors.error },
                   ]}
                 >
-                  Due: {formatDate(todo.dueDate)}
+                  Due: {formatDueDate(todo.dueDate)}
                 </Text>
               )}
             </View>
@@ -144,7 +158,7 @@ export default React.memo(function TodoItem({
           accessible={true}
           accessibilityLabel={`Todo: ${todo.title}${
             todo.completed ? ', completed' : ''
-          }${todo.dueDate ? `, due ${formatDate(todo.dueDate)}` : ''}`}
+          }${todo.dueDate ? `, due ${formatDueDate(todo.dueDate)}` : ''}`}
           accessibilityRole="button"
         />
       </Swipeable>
