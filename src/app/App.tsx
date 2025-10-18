@@ -6,11 +6,15 @@ import { PaperProvider } from 'react-native-paper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useCurrentTheme, useThemeStore } from '@/app/theme/theme';
 import { initializeTodoStore } from '@/store/useTodoStore';
+import { useSupabaseSync } from '@/hooks/useSupabaseSync';
 import RootNavigator from '@/app/navigation/RootNavigator';
 
 function AppContent() {
   const theme = useCurrentTheme();
   const { themeMode } = useThemeStore();
+
+  // Set up realtime sync with Supabase
+  useSupabaseSync();
 
   const statusBarStyle =
     themeMode === 'dark' || (themeMode === 'system' && theme.dark)

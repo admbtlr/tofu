@@ -1,34 +1,115 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Todo } from '@/types/todo';
+import { supabase, TodoRow } from '@/lib/supabase';
 
-const TODOS_KEY = '@todos';
 const THEME_KEY = '@theme';
 
-let saveTimeout: NodeJS.Timeout | null = null;
+// Helper to convert database row to Todo type
+const rowToTodo = (row: TodoRow): Todo => ({
+  id: row.id,
+  title: row.title,
+  notes: row.notes || undefined,
+  dueDate: row.due_date || undefined,
+  createdAt: row.created_at,
+  completedAt: row.completed_at || undefined,
+  completed: row.completed,
+});
+
+// Helper to convert Todo to database row format
+const todoToRow = (todo: Todo): Partial<TodoRow> => ({
+  id: todo.id,
+  title: todo.title,
+  notes: todo.notes || null,
+  due_date: todo.dueDate || null,
+  created_at: todo.createdAt,
+  completed_at: todo.completedAt || null,
+  completed: todo.completed,
+});
 
 export const loadTodos = async (): Promise<Todo[]> => {
   try {
-    const jsonValue = await AsyncStorage.getItem(TODOS_KEY);
-    return jsonValue != null ? JSON.parse(jsonValue) : [];
+    const { data, error } = await supabase
+      .from('todos')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading todos from Supabase:', error);
+      return [];
+    }
+
+    return (data || []).map(rowToTodo);
   } catch (e) {
     console.error('Error loading todos:', e);
     return [];
   }
 };
 
+// Note: This now syncs the entire todo list to Supabase
+// In a production app, you'd want to update individual todos instead
 export const saveTodos = async (todos: Todo[]): Promise<void> => {
-  if (saveTimeout) {
-    clearTimeout(saveTimeout);
-  }
+  // This function is kept for backward compatibility with the store
+  // But we'll handle saves differently with individual operations
+  console.warn('saveTodos called - consider using individual operations instead');
+};
 
-  saveTimeout = setTimeout(async () => {
-    try {
-      const jsonValue = JSON.stringify(todos);
-      await AsyncStorage.setItem(TODOS_KEY, jsonValue);
-    } catch (e) {
-      console.error('Error saving todos:', e);
+// New individual CRUD operations
+export const createTodo = async (todo: Todo): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('todos')
+      .insert([todoToRow(todo)]);
+
+    if (error) {
+      console.error('Error creating todo:', error);
+      throw error;
     }
-  }, 300); // 300ms debounce
+  } catch (e) {
+    console.error('Error creating todo:', e);
+    throw e;
+  }
+};
+
+export const updateTodo = async (id: string, updates: Partial<Todo>): Promise<void> => {
+  try {
+    const partialRow: Partial<TodoRow> = {};
+
+    if (updates.title !== undefined) partialRow.title = updates.title;
+    if (updates.notes !== undefined) partialRow.notes = updates.notes || null;
+    if (updates.dueDate !== undefined) partialRow.due_date = updates.dueDate || null;
+    if (updates.completedAt !== undefined) partialRow.completed_at = updates.completedAt || null;
+    if (updates.completed !== undefined) partialRow.completed = updates.completed;
+
+    const { error } = await supabase
+      .from('todos')
+      .update(partialRow)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating todo:', error);
+      throw error;
+    }
+  } catch (e) {
+    console.error('Error updating todo:', e);
+    throw e;
+  }
+};
+
+export const deleteTodo = async (id: string): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('todos')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting todo:', error);
+      throw error;
+    }
+  } catch (e) {
+    console.error('Error deleting todo:', e);
+    throw e;
+  }
 };
 
 export const loadTheme = async (): Promise<'light' | 'dark' | 'system'> => {

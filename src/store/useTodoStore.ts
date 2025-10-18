@@ -2,7 +2,12 @@ import { create } from 'zustand';
 import { Todo, TodoId, FilterType, SortType, TodoStore } from '@/types/todo';
 import { generateId } from '@/utils/validators';
 import { createDateString } from '@/utils/date';
-import { loadTodos, saveTodos } from '@/storage/todoStorage';
+import {
+  loadTodos,
+  createTodo,
+  updateTodo as updateTodoInDb,
+  deleteTodo as deleteTodoFromDb,
+} from '@/storage/todoStorage';
 
 const filterTodos = (
   todos: Todo[],
@@ -92,7 +97,11 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
 
     set(state => {
       const newTodos = [...state.todos, newTodo];
-      saveTodos(newTodos);
+      // Optimistically update UI
+      createTodo(newTodo).catch(error => {
+        console.error('Failed to create todo:', error);
+        // Optionally: revert the optimistic update
+      });
       return { todos: newTodos };
     });
   },
@@ -102,7 +111,11 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
       const newTodos = state.todos.map(todo =>
         todo.id === id ? { ...todo, ...updates } : todo
       );
-      saveTodos(newTodos);
+      // Optimistically update UI
+      updateTodoInDb(id, updates).catch(error => {
+        console.error('Failed to update todo:', error);
+        // Optionally: revert the optimistic update
+      });
       return { todos: newTodos };
     });
   },
@@ -110,7 +123,11 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
   deleteTodo: (id: TodoId) => {
     set(state => {
       const newTodos = state.todos.filter(todo => todo.id !== id);
-      saveTodos(newTodos);
+      // Optimistically update UI
+      deleteTodoFromDb(id).catch(error => {
+        console.error('Failed to delete todo:', error);
+        // Optionally: revert the optimistic update
+      });
       return { todos: newTodos };
     });
   },
@@ -120,22 +137,29 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
       const newTodos = state.todos.map(todo => {
         if (todo.id === id) {
           const completed = !todo.completed;
-          return {
-            ...todo,
+          const updates = {
             completed,
             completedAt: completed ? createDateString(new Date()) : undefined,
+          };
+          // Optimistically update UI
+          updateTodoInDb(id, updates).catch(error => {
+            console.error('Failed to toggle complete:', error);
+            // Optionally: revert the optimistic update
+          });
+          return {
+            ...todo,
+            ...updates,
           };
         }
         return todo;
       });
-      saveTodos(newTodos);
       return { todos: newTodos };
     });
   },
 
   bulkSet: (todos: Todo[]) => {
     set({ todos });
-    saveTodos(todos);
+    // No need to save when bulk setting (used for initial load)
   },
 
   setQuery: (query: string) => {

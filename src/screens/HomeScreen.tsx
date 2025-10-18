@@ -139,12 +139,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <Header
-        title="Todos"
-        showAdd
-        onAddPress={handleAddTodo}
-        showThemeToggle
-      />
+      <Header title="Tofu" showAdd onAddPress={handleAddTodo} showThemeToggle />
 
       <SearchBar value={query} onChangeText={setQuery} />
 

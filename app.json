@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Todo App",
-    "slug": "todo-app",
+    "name": "Tofu",
+    "slug": "tofu",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,14 +14,14 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.todoapp"
+      "bundleIdentifier": "eu.btlr.tofu"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.yourcompany.todoapp"
+      "package": "eu.btlr.tofu"
     },
     "web": {
       "favicon": "./assets/favicon.png"
