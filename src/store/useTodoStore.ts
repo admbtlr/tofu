@@ -8,6 +8,10 @@ import {
   updateTodo as updateTodoInDb,
   deleteTodo as deleteTodoFromDb,
 } from '@/storage/todoStorage';
+import {
+  scheduleNotification,
+  cancelNotification,
+} from '@/utils/notifications';
 
 const filterTodos = (
   todos: Todo[],
@@ -87,13 +91,25 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
   filter: 'all',
   sort: 'default',
 
-  addTodo: (todoData: Omit<Todo, 'id' | 'createdAt'>) => {
+  addTodo: async (todoData: Omit<Todo, 'id' | 'createdAt'>) => {
     const newTodo: Todo = {
       ...todoData,
       id: generateId(),
       createdAt: createDateString(new Date()),
       completed: false,
     };
+
+    // Schedule notification if enabled
+    if (newTodo.notifyEnabled && newTodo.dueDate) {
+      const notificationId = await scheduleNotification(
+        newTodo.id,
+        newTodo.title,
+        newTodo.dueDate
+      );
+      if (notificationId) {
+        newTodo.notificationId = notificationId;
+      }
+    }
 
     set(state => {
       const newTodos = [...state.todos, newTodo];
@@ -106,9 +122,36 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
     });
   },
 
-  updateTodo: (id: TodoId, updates: Partial<Todo>) => {
-    set(state => {
-      const newTodos = state.todos.map(todo =>
+  updateTodo: async (id: TodoId, updates: Partial<Todo>) => {
+    const state = useTodoStore.getState();
+    const existingTodo = state.todos.find((todo: Todo) => todo.id === id);
+
+    if (!existingTodo) return;
+
+    // Handle notification changes
+    const updatedTodo = { ...existingTodo, ...updates };
+
+    // Cancel existing notification if exists
+    if (existingTodo.notificationId) {
+      await cancelNotification(existingTodo.notificationId);
+    }
+
+    // Schedule new notification if enabled and has due date
+    if (updatedTodo.notifyEnabled && updatedTodo.dueDate && !updatedTodo.completed) {
+      const notificationId = await scheduleNotification(
+        updatedTodo.id,
+        updatedTodo.title,
+        updatedTodo.dueDate
+      );
+      if (notificationId) {
+        updates.notificationId = notificationId;
+      }
+    } else {
+      updates.notificationId = undefined;
+    }
+
+    useTodoStore.setState((state: TodoStore) => {
+      const newTodos = state.todos.map((todo: Todo) =>
         todo.id === id ? { ...todo, ...updates } : todo
       );
       // Optimistically update UI
@@ -120,9 +163,17 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
     });
   },
 
-  deleteTodo: (id: TodoId) => {
-    set(state => {
-      const newTodos = state.todos.filter(todo => todo.id !== id);
+  deleteTodo: async (id: TodoId) => {
+    const state = useTodoStore.getState();
+    const todo = state.todos.find((t: Todo) => t.id === id);
+
+    // Cancel notification if exists
+    if (todo?.notificationId) {
+      await cancelNotification(todo.notificationId);
+    }
+
+    useTodoStore.setState((state: TodoStore) => {
+      const newTodos = state.todos.filter((todo: Todo) => todo.id !== id);
       // Optimistically update UI
       deleteTodoFromDb(id).catch(error => {
         console.error('Failed to delete todo:', error);
@@ -132,14 +183,26 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
     });
   },
 
-  toggleComplete: (id: TodoId) => {
-    set(state => {
-      const newTodos = state.todos.map(todo => {
+  toggleComplete: async (id: TodoId) => {
+    const state = useTodoStore.getState();
+    const todo = state.todos.find((t: Todo) => t.id === id);
+
+    if (!todo) return;
+
+    const completed = !todo.completed;
+
+    // Cancel notification when completing a todo
+    if (completed && todo.notificationId) {
+      await cancelNotification(todo.notificationId);
+    }
+
+    useTodoStore.setState((state: TodoStore) => {
+      const newTodos = state.todos.map((todo: Todo) => {
         if (todo.id === id) {
-          const completed = !todo.completed;
           const updates = {
             completed,
             completedAt: completed ? createDateString(new Date()) : undefined,
+            notificationId: completed ? undefined : todo.notificationId,
           };
           // Optimistically update UI
           updateTodoInDb(id, updates).catch(error => {

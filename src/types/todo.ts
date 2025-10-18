@@ -8,6 +8,8 @@ export interface Todo {
   createdAt: string; // ISO string
   completedAt?: string; // ISO string
   completed: boolean;
+  notifyEnabled?: boolean; // Whether to send notification for this todo
+  notificationId?: string; // ID of the scheduled notification
 }
 
 export type FilterType = 'all' | 'active' | 'completed';

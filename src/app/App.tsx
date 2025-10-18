@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useCurrentTheme, useThemeStore } from '@/app/theme/theme';
 import { initializeTodoStore } from '@/store/useTodoStore';
 import { useSupabaseSync } from '@/hooks/useSupabaseSync';
+import { requestNotificationPermissions } from '@/utils/notifications';
 import RootNavigator from '@/app/navigation/RootNavigator';
 
 function AppContent() {
@@ -41,7 +42,11 @@ export default function App() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        await Promise.all([initializeTheme(), initializeTodoStore()]);
+        await Promise.all([
+          initializeTheme(),
+          initializeTodoStore(),
+          requestNotificationPermissions(),
+        ]);
       } catch (error) {
         console.error('Failed to initialize app:', error);
       }

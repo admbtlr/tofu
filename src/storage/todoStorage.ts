@@ -13,6 +13,8 @@ const rowToTodo = (row: TodoRow): Todo => ({
   createdAt: row.created_at,
   completedAt: row.completed_at || undefined,
   completed: row.completed,
+  notifyEnabled: row.notify_enabled || undefined,
+  notificationId: row.notification_id || undefined,
 });
 
 // Helper to convert Todo to database row format
@@ -24,6 +26,8 @@ const todoToRow = (todo: Todo): Partial<TodoRow> => ({
   created_at: todo.createdAt,
   completed_at: todo.completedAt || null,
   completed: todo.completed,
+  notify_enabled: todo.notifyEnabled || null,
+  notification_id: todo.notificationId || null,
 });
 
 export const loadTodos = async (): Promise<Todo[]> => {
@@ -79,6 +83,8 @@ export const updateTodo = async (id: string, updates: Partial<Todo>): Promise<vo
     if (updates.dueDate !== undefined) partialRow.due_date = updates.dueDate || null;
     if (updates.completedAt !== undefined) partialRow.completed_at = updates.completedAt || null;
     if (updates.completed !== undefined) partialRow.completed = updates.completed;
+    if (updates.notifyEnabled !== undefined) partialRow.notify_enabled = updates.notifyEnabled || null;
+    if (updates.notificationId !== undefined) partialRow.notification_id = updates.notificationId || null;
 
     const { error } = await supabase
       .from('todos')

@@ -3,7 +3,7 @@ import { createDateString } from '@/utils/date';
 import { validateTodoNotes, validateTodoTitle } from '@/utils/validators';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View, Platform } from 'react-native';
 import { Button, Surface, Text, TextInput, useTheme, Switch } from 'react-native-paper';
 
 const BORDER_RADIUS = 12;
@@ -14,6 +14,7 @@ interface TodoEditorProps {
     title: string;
     notes?: string;
     dueDate?: string;
+    notifyEnabled?: boolean;
   }) => void;
   onCancel: () => void;
 }
@@ -43,6 +44,9 @@ export default function TodoEditor({
     }
     return false;
   });
+  const [notifyEnabled, setNotifyEnabled] = useState<boolean>(todo?.notifyEnabled || false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [titleError, setTitleError] = useState<string | null>(null);
   const [notesError, setNotesError] = useState<string | null>(null);
 
@@ -76,6 +80,7 @@ export default function TodoEditor({
       title: title.trim(),
       notes: notes.trim() || undefined,
       dueDate: finalDueDate ? createDateString(finalDueDate) : undefined,
+      notifyEnabled: notifyEnabled && !!finalDueDate, // Only enable if there's a due date
     });
   };
 
@@ -160,25 +165,56 @@ export default function TodoEditor({
             <Text variant="titleMedium">Due Date</Text>
           </View>
 
-          <View style={[styles.datePickerContainer]}>
-            <DateTimePicker
-              value={dueDate || new Date()}
-              mode="date"
-              display="spinner"
-              minimumDate={new Date()}
-              onChange={(_, selectedDate) => {
-                if (selectedDate) {
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  if (selectedDate >= today) {
-                    handleDateConfirm(selectedDate);
+          {Platform.OS === 'ios' ? (
+            <View style={[styles.datePickerContainer]}>
+              <DateTimePicker
+                value={dueDate || new Date()}
+                mode="date"
+                display="spinner"
+                minimumDate={new Date()}
+                onChange={(_, selectedDate) => {
+                  if (selectedDate) {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (selectedDate >= today) {
+                      handleDateConfirm(selectedDate);
+                    }
                   }
-                }
-              }}
-              textColor={theme.colors.onSurface}
-              accentColor={theme.colors.primary}
-            />
-          </View>
+                }}
+                textColor={theme.colors.onSurface}
+                accentColor={theme.colors.primary}
+              />
+            </View>
+          ) : (
+            <>
+              <Button
+                mode="outlined"
+                onPress={() => setShowDatePicker(true)}
+                style={styles.dateButton}
+                icon="calendar"
+              >
+                {dueDate ? dueDate.toLocaleDateString() : 'Select Date'}
+              </Button>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={dueDate || new Date()}
+                  mode="date"
+                  display="default"
+                  minimumDate={new Date()}
+                  onChange={(event, selectedDate) => {
+                    setShowDatePicker(false);
+                    if (event.type === 'set' && selectedDate) {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      if (selectedDate >= today) {
+                        handleDateConfirm(selectedDate);
+                      }
+                    }
+                  }}
+                />
+              )}
+            </>
+          )}
 
           <View style={styles.timeToggleContainer}>
             <Text variant="bodyMedium">Include time</Text>
@@ -206,26 +242,73 @@ export default function TodoEditor({
           </View>
 
           {includeTime && (
-            <View style={styles.datePickerContainer}>
-              <DateTimePicker
-                value={dueDate || new Date()}
-                mode="time"
-                display="spinner"
-                onChange={(_, selectedTime) => {
-                  if (selectedTime) {
-                    // Use existing dueDate or today if no date is set
-                    const baseDate = dueDate || new Date();
-                    const newDate = new Date(baseDate);
-                    newDate.setHours(selectedTime.getHours());
-                    newDate.setMinutes(selectedTime.getMinutes());
-                    setDueDate(newDate);
-                  }
-                }}
-                textColor={theme.colors.onSurface}
-                accentColor={theme.colors.primary}
-              />
-            </View>
+            Platform.OS === 'ios' ? (
+              <View style={styles.datePickerContainer}>
+                <DateTimePicker
+                  value={dueDate || new Date()}
+                  mode="time"
+                  display="spinner"
+                  onChange={(_, selectedTime) => {
+                    if (selectedTime) {
+                      // Use existing dueDate or today if no date is set
+                      const baseDate = dueDate || new Date();
+                      const newDate = new Date(baseDate);
+                      newDate.setHours(selectedTime.getHours());
+                      newDate.setMinutes(selectedTime.getMinutes());
+                      setDueDate(newDate);
+                    }
+                  }}
+                  textColor={theme.colors.onSurface}
+                  accentColor={theme.colors.primary}
+                />
+              </View>
+            ) : (
+              <>
+                <Button
+                  mode="outlined"
+                  onPress={() => setShowTimePicker(true)}
+                  style={styles.dateButton}
+                  icon="clock-outline"
+                >
+                  {dueDate ? dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Select Time'}
+                </Button>
+                {showTimePicker && (
+                  <DateTimePicker
+                    value={dueDate || new Date()}
+                    mode="time"
+                    display="default"
+                    onChange={(event, selectedTime) => {
+                      setShowTimePicker(false);
+                      if (event.type === 'set' && selectedTime) {
+                        // Use existing dueDate or today if no date is set
+                        const baseDate = dueDate || new Date();
+                        const newDate = new Date(baseDate);
+                        newDate.setHours(selectedTime.getHours());
+                        newDate.setMinutes(selectedTime.getMinutes());
+                        setDueDate(newDate);
+                      }
+                    }}
+                  />
+                )}
+              </>
+            )
           )}
+
+          <View style={styles.timeToggleContainer}>
+            <View style={styles.notificationToggleText}>
+              <Text variant="bodyMedium">Remind me</Text>
+              {!dueDate && (
+                <Text variant="bodySmall" style={{ opacity: 0.6 }}>
+                  Set a due date first
+                </Text>
+              )}
+            </View>
+            <Switch
+              value={notifyEnabled}
+              onValueChange={setNotifyEnabled}
+              disabled={!dueDate}
+            />
+          </View>
         </Surface>
       </ScrollView>
 
@@ -298,6 +381,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 8,
     marginTop: 8,
+  },
+  notificationToggleText: {
+    flex: 1,
+  },
+  dateButton: {
+    marginVertical: 12,
+    marginHorizontal: 8,
+    borderRadius: BORDER_RADIUS,
   },
   dateSpinner: {
     width: '100%',

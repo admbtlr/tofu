@@ -23,5 +23,7 @@ export type TodoRow = {
   created_at: string;
   completed_at: string | null;
   completed: boolean;
+  notify_enabled: boolean | null;
+  notification_id: string | null;
   user_id: string | null;
 };
