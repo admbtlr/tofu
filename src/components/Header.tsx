@@ -55,7 +55,7 @@ export default function Header({
   };
 
   return (
-    <Appbar.Header>
+    <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
       {showThemeToggle && (
         <Menu
           visible={menuVisible}
