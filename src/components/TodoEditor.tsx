@@ -129,6 +129,7 @@ export default function TodoEditor({
           error={!!titleError}
           accessibilityLabel="Todo title"
           maxLength={120}
+          autoFocus={!todo}
         />
         {titleError && (
           <Text
