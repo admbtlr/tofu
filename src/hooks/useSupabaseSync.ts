@@ -2,15 +2,21 @@ import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useTodoStore } from '@/store/useTodoStore';
 import { loadTodos } from '@/storage/todoStorage';
+import { User } from '@supabase/supabase-js';
 
 /**
  * Hook to set up realtime synchronization with Supabase.
  * This enables multi-device sync - changes made on one device
  * will automatically appear on other devices in real-time.
+ *
+ * Only subscribes when user is authenticated.
  */
-export const useSupabaseSync = () => {
+export const useSupabaseSync = (user: User | null) => {
   useEffect(() => {
-    console.log('Setting up Supabase realtime subscription...');
+    // Only set up subscription if user is authenticated
+    if (!user) {
+      return;
+    }
 
     // Subscribe to all changes on the todos table
     const channel = supabase
@@ -23,8 +29,6 @@ export const useSupabaseSync = () => {
           table: 'todos',
         },
         async (payload) => {
-          console.log('Realtime change received:', payload.eventType);
-
           // Instead of trying to merge individual changes (which can be complex),
           // we simply reload all todos from the database
           // This is simpler and ensures consistency
@@ -36,18 +40,11 @@ export const useSupabaseSync = () => {
           }
         }
       )
-      .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
-          console.log('Successfully subscribed to realtime changes');
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error('Failed to subscribe to realtime changes');
-        }
-      });
+      .subscribe();
 
-    // Cleanup subscription on unmount
+    // Cleanup subscription on unmount or when user changes
     return () => {
-      console.log('Cleaning up Supabase realtime subscription...');
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user]); // Re-subscribe if user changes
 };

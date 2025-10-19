@@ -68,9 +68,7 @@ export default React.memo(function TodoItem({
   };
 
   const renderRightAction = () => (
-    <View
-      style={[styles.deleteAction, { backgroundColor: '#dc2626' }]}
-    >
+    <View style={[styles.deleteAction, { backgroundColor: '#dc2626' }]}>
       <IconButton
         icon="delete"
         iconColor="white"
@@ -91,10 +89,12 @@ export default React.memo(function TodoItem({
     todo.dueDate && !todo.completed && isOverdue(todo.dueDate);
 
   // Check if the due date has a specific time set (not midnight)
-  const hasTime = todo.dueDate ? (() => {
-    const date = new Date(todo.dueDate);
-    return date.getHours() !== 0 || date.getMinutes() !== 0;
-  })() : false;
+  const hasTime = todo.dueDate
+    ? (() => {
+        const date = new Date(todo.dueDate);
+        return date.getHours() !== 0 || date.getMinutes() !== 0;
+      })()
+    : false;
 
   const formatDueDate = (dateString: string) => {
     const formattedDate = formatDate(dateString);
@@ -110,7 +110,7 @@ export default React.memo(function TodoItem({
         ref={swipeableRef}
         renderRightActions={renderRightAction}
         rightThreshold={80}
-        onSwipeableWillOpen={(direction) => {
+        onSwipeableWillOpen={direction => {
           if (direction === 'right') {
             handleDelete();
           }
@@ -119,6 +119,7 @@ export default React.memo(function TodoItem({
         <List.Item
           title={todo.title}
           titleStyle={titleStyle}
+          contentStyle={{ marginLeft: -10 }}
           description={
             <View style={styles.description}>
               {todo.notes && (
@@ -145,7 +146,7 @@ export default React.memo(function TodoItem({
               iconColor={
                 todo.completed ? theme.colors.primary : theme.colors.onSurface
               }
-              size={35}
+              size={24}
               onPress={handleToggleComplete}
               style={styles.checkbox}
             />
@@ -162,6 +163,14 @@ export default React.memo(function TodoItem({
           accessibilityRole="button"
         />
       </Swipeable>
+      <View
+        style={{
+          height: StyleSheet.hairlineWidth,
+          backgroundColor: theme.colors.onSurface,
+          marginHorizontal: 16,
+          opacity: 0.3,
+        }}
+      ></View>
     </Animated.View>
   );
 });
@@ -169,7 +178,7 @@ export default React.memo(function TodoItem({
 const styles = StyleSheet.create({
   item: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 0,
   },
   title: {
     fontSize: 16,

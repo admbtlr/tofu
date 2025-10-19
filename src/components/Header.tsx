@@ -1,6 +1,7 @@
 import React from 'react';
-import { Appbar, IconButton, Menu } from 'react-native-paper';
+import { Appbar, IconButton, Menu, useTheme } from 'react-native-paper';
 import { useThemeStore, ThemeMode } from '@/app/theme/theme';
+import { useAuthStore } from '@/store/useAuthStore';
 
 interface HeaderProps {
   title: string;
@@ -9,6 +10,7 @@ interface HeaderProps {
   showBack?: boolean;
   onBackPress?: () => void;
   showThemeToggle?: boolean;
+  showLogout?: boolean;
 }
 
 export default function Header({
@@ -18,9 +20,12 @@ export default function Header({
   showBack = false,
   onBackPress,
   showThemeToggle = false,
+  showLogout = false,
 }: HeaderProps) {
+  const theme = useTheme();
   const [menuVisible, setMenuVisible] = React.useState(false);
   const { themeMode, setThemeMode } = useThemeStore();
+  const { signOut } = useAuthStore();
 
   const openMenu = () => setMenuVisible(true);
   const closeMenu = () => setMenuVisible(false);
@@ -28,6 +33,14 @@ export default function Header({
   const handleThemeChange = (mode: ThemeMode) => {
     setThemeMode(mode);
     closeMenu();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
   };
 
   const getThemeIcon = (mode: ThemeMode) => {
@@ -82,6 +95,13 @@ export default function Header({
           icon="plus"
           onPress={onAddPress}
           accessibilityLabel="Add new todo"
+        />
+      )}
+      {showLogout && (
+        <IconButton
+          icon="logout"
+          onPress={handleLogout}
+          accessibilityLabel="Sign out"
         />
       )}
     </Appbar.Header>

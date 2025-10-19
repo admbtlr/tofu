@@ -15,7 +15,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Chip, Portal, Snackbar, useTheme } from 'react-native-paper';
+import { Chip, Portal, Snackbar, useTheme, FAB } from 'react-native-paper';
 
 const BORDER_RADIUS = 12;
 
@@ -139,7 +139,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     <View
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      <Header title="Tofu" showAdd onAddPress={handleAddTodo} showThemeToggle />
+      <Header title="Tofu" showThemeToggle showLogout />
 
       <SearchBar value={query} onChangeText={setQuery} />
 
@@ -230,6 +230,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         />
       )}
 
+      <FAB
+        icon="plus"
+        mode="flat"
+        color={theme.colors.onPrimary}
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        onPress={handleAddTodo}
+        accessibilityLabel="Add new todo"
+      />
+
       <Portal>
         <Snackbar
           visible={snackbarVisible}
@@ -262,5 +271,14 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 32,
+    left: '50%',
+    marginLeft: -28,
+    borderRadius: 28,
+    width: 56,
+    height: 56,
   },
 });

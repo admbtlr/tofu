@@ -60,6 +60,8 @@ export const saveTodos = async (todos: Todo[]): Promise<void> => {
 // New individual CRUD operations
 export const createTodo = async (todo: Todo): Promise<void> => {
   try {
+    // Note: user_id will be automatically set by the database default (auth.uid())
+    // The RLS policies ensure users can only create todos for themselves
     const { error } = await supabase
       .from('todos')
       .insert([todoToRow(todo)]);

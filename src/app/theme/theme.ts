@@ -11,6 +11,8 @@ export const lightTheme: MD3Theme = {
     onPrimary: 'rgb(255, 255, 255)',
     primaryContainer: 'rgb(208, 237, 255)',
     onPrimaryContainer: 'rgb(0, 32, 66)',
+    background: 'rgb(230, 225, 220)',
+    onSurface: 'rgb(60, 30, 10)',
   },
 };
 
