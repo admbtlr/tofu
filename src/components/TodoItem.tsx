@@ -1,7 +1,7 @@
 import { useTodoStore } from '@/store/useTodoStore';
 import { Todo } from '@/types/todo';
 import { formatDate, formatTime, isOverdue } from '@/utils/date';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import { IconButton, List, Text, useTheme } from 'react-native-paper';
@@ -9,6 +9,8 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
+  withDelay,
 } from 'react-native-reanimated';
 
 interface TodoItemProps {
@@ -23,20 +25,64 @@ export default React.memo(function TodoItem({
   onDelete,
 }: TodoItemProps) {
   const theme = useTheme();
-  const { toggleComplete, deleteTodo } = useTodoStore();
+  const { toggleComplete, deleteTodo, filter, removePendingRemoval } =
+    useTodoStore();
   const swipeableRef = React.useRef<Swipeable>(null);
+  const removalTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const wasCompleted = useRef(todo.completed);
 
   const opacity = useSharedValue(1);
   const scale = useSharedValue(1);
+  const height = useSharedValue(1);
 
   useEffect(() => {
-    opacity.value = withSpring(todo.completed ? 0.6 : 1);
-    scale.value = withSpring(todo.completed ? 0.98 : 1);
-  }, [todo.completed, opacity, scale]);
+    // Check if the todo was just completed (transition from uncompleted to completed)
+    const justCompleted = !wasCompleted.current && todo.completed;
+    wasCompleted.current = todo.completed;
+
+    if (justCompleted && filter !== 'completed') {
+      // Show greyed out state immediately
+      opacity.value = withSpring(0.5);
+      scale.value = withSpring(0.98);
+
+      // After 3 seconds, animate out and remove
+      removalTimerRef.current = setTimeout(() => {
+        // Fade out
+        opacity.value = withTiming(0, { duration: 300 });
+        // height.value = withTiming(0, { duration: 300 });
+
+        // Remove from pending list after animation completes
+        setTimeout(() => {
+          removePendingRemoval(todo.id);
+        }, 300);
+      }, 3000);
+    } else if (!todo.completed) {
+      // Reset animation values if uncompleted
+      opacity.value = withSpring(1);
+      scale.value = withSpring(1);
+      height.value = withSpring(1);
+      // Make sure it's not in pending removal
+      removePendingRemoval(todo.id);
+    }
+
+    return () => {
+      if (removalTimerRef.current) {
+        clearTimeout(removalTimerRef.current);
+      }
+    };
+  }, [
+    todo.completed,
+    todo.id,
+    filter,
+    opacity,
+    scale,
+    height,
+    removePendingRemoval,
+  ]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
-    transform: [{ scale: scale.value }],
+    transform: [{ scale: scale.value }, { scaleY: height.value }],
   }));
 
   const handleToggleComplete = () => {
@@ -81,8 +127,10 @@ export default React.memo(function TodoItem({
 
   const titleStyle = [
     styles.title,
-    todo.completed && { textDecorationLine: 'line-through' as const },
-    todo.completed && { opacity: 0.6 },
+    todo.completed && {
+      textDecorationLine: 'line-through' as const,
+      color: theme.colors.onSurfaceVariant,
+    },
   ];
 
   const isItemOverdue =

@@ -110,11 +110,19 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
 
     switch (filter) {
-      case 'active':
+      case 'today':
         return {
-          title: 'No Active Todos',
-          subtitle: 'All your todos are completed!',
+          title: 'Nothing Due Today',
+          subtitle: 'You\'re all caught up!',
           icon: 'check-circle-outline',
+          actionLabel: 'Add Todo',
+          onActionPress: handleAddTodo,
+        };
+      case 'all':
+        return {
+          title: 'No Todos Yet',
+          subtitle: 'Tap the + button to create your first todo',
+          icon: 'clipboard-text-outline',
           actionLabel: 'Add Todo',
           onActionPress: handleAddTodo,
         };
@@ -145,6 +153,27 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
       <View style={styles.filters}>
         <Chip
+          selected={filter === 'today'}
+          onPress={() => handleFilterPress('today')}
+          style={[
+            styles.filterChip,
+            { borderRadius: BORDER_RADIUS },
+            filter === 'today' && {
+              backgroundColor: theme.colors.primary,
+              elevation: 2,
+            },
+          ]}
+          textStyle={
+            filter === 'today' && {
+              color: theme.colors.onPrimary,
+              fontWeight: '600',
+            }
+          }
+          showSelectedCheck={false}
+        >
+          Today
+        </Chip>
+        <Chip
           selected={filter === 'all'}
           onPress={() => handleFilterPress('all')}
           style={[
@@ -164,27 +193,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           showSelectedCheck={false}
         >
           All
-        </Chip>
-        <Chip
-          selected={filter === 'active'}
-          onPress={() => handleFilterPress('active')}
-          style={[
-            styles.filterChip,
-            { borderRadius: BORDER_RADIUS },
-            filter === 'active' && {
-              backgroundColor: theme.colors.primary,
-              elevation: 2,
-            },
-          ]}
-          textStyle={
-            filter === 'active' && {
-              color: theme.colors.onPrimary,
-              fontWeight: '600',
-            }
-          }
-          showSelectedCheck={false}
-        >
-          Active
         </Chip>
         <Chip
           selected={filter === 'completed'}

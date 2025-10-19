@@ -16,7 +16,8 @@ import {
 const filterTodos = (
   todos: Todo[],
   query: string,
-  filter: FilterType
+  filter: FilterType,
+  pendingRemovalIds: Set<string>
 ): Todo[] => {
   let filtered = todos;
 
@@ -31,14 +32,33 @@ const filterTodos = (
   }
 
   // Apply status filter
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
   switch (filter) {
-    case 'active':
-      filtered = filtered.filter(todo => !todo.completed);
-      break;
-    case 'completed':
-      filtered = filtered.filter(todo => todo.completed);
+    case 'today':
+      // Show uncompleted todos that are due today or earlier, or have no due date
+      // Also show todos that are pending removal (animating out)
+      filtered = filtered.filter(todo => {
+        if (pendingRemovalIds.has(todo.id)) return true;
+        if (todo.completed) return false;
+        if (!todo.dueDate) return true;
+        const dueDate = new Date(todo.dueDate);
+        return dueDate <= now;
+      });
       break;
     case 'all':
+      // Show all uncompleted todos
+      // Also show todos that are pending removal (animating out)
+      filtered = filtered.filter(todo => {
+        if (pendingRemovalIds.has(todo.id)) return true;
+        return !todo.completed;
+      });
+      break;
+    case 'completed':
+      // Show all completed todos
+      filtered = filtered.filter(todo => todo.completed);
+      break;
     default:
       break;
   }
@@ -46,23 +66,34 @@ const filterTodos = (
   return filtered;
 };
 
-const sortTodos = (todos: Todo[], sort: SortType): Todo[] => {
+const sortTodos = (todos: Todo[], sort: SortType, pendingRemovalIds: Set<string>): Todo[] => {
   const sorted = [...todos];
 
   switch (sort) {
     case 'dueDate':
       return sorted.sort((a, b) => {
+        // Don't reorder pending removal todos
+        if (pendingRemovalIds.has(a.id) || pendingRemovalIds.has(b.id)) return 0;
+
         if (!a.dueDate && !b.dueDate) return 0;
         if (!a.dueDate) return 1;
         if (!b.dueDate) return -1;
         return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
       });
     case 'alphabetical':
-      return sorted.sort((a, b) => a.title.localeCompare(b.title));
+      return sorted.sort((a, b) => {
+        // Don't reorder pending removal todos
+        if (pendingRemovalIds.has(a.id) || pendingRemovalIds.has(b.id)) return 0;
+
+        return a.title.localeCompare(b.title);
+      });
     case 'default':
     default:
       // Active first, then by createdAt desc; Completed by completedAt asc
       return sorted.sort((a, b) => {
+        // Don't reorder pending removal todos - keep them in their original position
+        if (pendingRemovalIds.has(a.id) || pendingRemovalIds.has(b.id)) return 0;
+
         if (a.completed && !b.completed) return 1;
         if (!a.completed && b.completed) return -1;
 
@@ -88,8 +119,9 @@ const sortTodos = (todos: Todo[], sort: SortType): Todo[] => {
 export const useTodoStore = create<TodoStore>((set, get) => ({
   todos: [],
   query: '',
-  filter: 'all',
+  filter: 'today',
   sort: 'default',
+  pendingRemovalIds: new Set<string>(),
 
   addTodo: async (todoData: Omit<Todo, 'id' | 'createdAt'>) => {
     const newTodo: Todo = {
@@ -191,6 +223,11 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
 
     const completed = !todo.completed;
 
+    // If completing (not uncompleting) and not in completed filter, add to pending removal
+    if (completed && state.filter !== 'completed') {
+      state.addPendingRemoval(id);
+    }
+
     // Cancel notification when completing a todo
     if (completed && todo.notificationId) {
       await cancelNotification(todo.notificationId);
@@ -237,10 +274,26 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
     set({ sort });
   },
 
+  addPendingRemoval: (id: string) => {
+    set(state => {
+      const newSet = new Set(state.pendingRemovalIds);
+      newSet.add(id);
+      return { pendingRemovalIds: newSet };
+    });
+  },
+
+  removePendingRemoval: (id: string) => {
+    set(state => {
+      const newSet = new Set(state.pendingRemovalIds);
+      newSet.delete(id);
+      return { pendingRemovalIds: newSet };
+    });
+  },
+
   visibleTodos: () => {
-    const { todos, query, filter, sort } = get();
-    const filtered = filterTodos(todos, query, filter);
-    return sortTodos(filtered, sort);
+    const { todos, query, filter, sort, pendingRemovalIds } = get();
+    const filtered = filterTodos(todos, query, filter, pendingRemovalIds);
+    return sortTodos(filtered, sort, pendingRemovalIds);
   },
 }));
 
