@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Todo, TodoId, FilterType, SortType, TodoStore } from '@/types/todo';
+import { Todo, TodoId, FilterType, SortType, TodoStore, RepeatType } from '@/types/todo';
 import { generateId } from '@/utils/validators';
 import { createDateString } from '@/utils/date';
 import {
@@ -12,6 +12,40 @@ import {
   scheduleNotification,
   cancelNotification,
 } from '@/utils/notifications';
+
+// Helper function to calculate the next due date based on repeat type
+const calculateNextDueDate = (currentDueDate: Date, repeatType: RepeatType): Date | null => {
+  const nextDate = new Date(currentDueDate);
+
+  switch (repeatType) {
+    case 'daily':
+      nextDate.setDate(nextDate.getDate() + 1);
+      return nextDate;
+
+    case 'weekdays':
+      // Move to next weekday (Monday-Friday)
+      nextDate.setDate(nextDate.getDate() + 1);
+      const dayOfWeek = nextDate.getDay();
+
+      // If it's Saturday, move to Monday
+      if (dayOfWeek === 6) {
+        nextDate.setDate(nextDate.getDate() + 2);
+      }
+      // If it's Sunday, move to Monday
+      else if (dayOfWeek === 0) {
+        nextDate.setDate(nextDate.getDate() + 1);
+      }
+      return nextDate;
+
+    case 'weekly':
+      nextDate.setDate(nextDate.getDate() + 7);
+      return nextDate;
+
+    case 'never':
+    default:
+      return null;
+  }
+};
 
 const filterTodos = (
   todos: Todo[],
@@ -231,6 +265,45 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
     // Cancel notification when completing a todo
     if (completed && todo.notificationId) {
       await cancelNotification(todo.notificationId);
+    }
+
+    // If completing and has repeat, create a new todo for the next occurrence
+    if (completed && todo.repeat && todo.repeat !== 'never' && todo.dueDate) {
+      const nextDueDate = calculateNextDueDate(new Date(todo.dueDate), todo.repeat);
+
+      if (nextDueDate) {
+        const newTodo: Todo = {
+          id: generateId(),
+          title: todo.title,
+          notes: todo.notes,
+          dueDate: createDateString(nextDueDate),
+          createdAt: createDateString(new Date()),
+          completed: false,
+          notifyEnabled: todo.notifyEnabled,
+          repeat: todo.repeat,
+        };
+
+        // Schedule notification for the new todo if enabled
+        if (newTodo.notifyEnabled && newTodo.dueDate) {
+          const notificationId = await scheduleNotification(
+            newTodo.id,
+            newTodo.title,
+            newTodo.dueDate
+          );
+          if (notificationId) {
+            newTodo.notificationId = notificationId;
+          }
+        }
+
+        // Add the new todo to the store
+        createTodo(newTodo).catch(error => {
+          console.error('Failed to create repeat todo:', error);
+        });
+
+        useTodoStore.setState((state: TodoStore) => ({
+          todos: [...state.todos, newTodo],
+        }));
+      }
     }
 
     useTodoStore.setState((state: TodoStore) => {

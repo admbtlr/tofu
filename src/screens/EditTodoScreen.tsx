@@ -4,7 +4,7 @@ import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@/app/navigation/RootNavigator';
 import { useTodoStore } from '@/store/useTodoStore';
-import { Todo } from '@/types/todo';
+import { Todo, RepeatType } from '@/types/todo';
 import Header from '@/components/Header';
 import TodoEditor from '@/components/TodoEditor';
 import { useTheme } from 'react-native-paper';
@@ -34,6 +34,8 @@ export default function EditTodoScreen({
     title: string;
     notes?: string;
     dueDate?: string;
+    notifyEnabled?: boolean;
+    repeat?: RepeatType;
   }) => {
     if (isEditing && todo) {
       updateTodo(todo.id, todoData);

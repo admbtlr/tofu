@@ -27,7 +27,7 @@ export const formatDate = (dateString: string): string => {
 
 export const formatTime = (dateString: string): string => {
   const date = parseISO(dateString);
-  return format(date, 'h:mm a');
+  return format(date, 'H:mm');
 };
 
 export const formatDateTime = (dateString: string): string => {

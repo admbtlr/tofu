@@ -108,5 +108,6 @@ export type TodoRow = {
   completed: boolean;
   notify_enabled: boolean | null;
   notification_id: string | null;
+  repeat: string | null;
   user_id: string | null;
 };

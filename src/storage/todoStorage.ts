@@ -15,6 +15,7 @@ const rowToTodo = (row: TodoRow): Todo => ({
   completed: row.completed,
   notifyEnabled: row.notify_enabled || undefined,
   notificationId: row.notification_id || undefined,
+  repeat: (row.repeat as Todo['repeat']) || undefined,
 });
 
 // Helper to convert Todo to database row format
@@ -28,6 +29,7 @@ const todoToRow = (todo: Todo): Partial<TodoRow> => ({
   completed: todo.completed,
   notify_enabled: todo.notifyEnabled || null,
   notification_id: todo.notificationId || null,
+  repeat: todo.repeat || null,
 });
 
 export const loadTodos = async (): Promise<Todo[]> => {
@@ -87,6 +89,7 @@ export const updateTodo = async (id: string, updates: Partial<Todo>): Promise<vo
     if (updates.completed !== undefined) partialRow.completed = updates.completed;
     if (updates.notifyEnabled !== undefined) partialRow.notify_enabled = updates.notifyEnabled || null;
     if (updates.notificationId !== undefined) partialRow.notification_id = updates.notificationId || null;
+    if (updates.repeat !== undefined) partialRow.repeat = updates.repeat || null;
 
     const { error } = await supabase
       .from('todos')

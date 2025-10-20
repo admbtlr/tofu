@@ -1,10 +1,10 @@
-import { Todo } from '@/types/todo';
+import { Todo, RepeatType } from '@/types/todo';
 import { createDateString } from '@/utils/date';
 import { validateTodoNotes, validateTodoTitle } from '@/utils/validators';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View, Platform } from 'react-native';
-import { Button, Surface, Text, TextInput, useTheme, Switch } from 'react-native-paper';
+import { Button, Surface, Text, TextInput, useTheme, Switch, Menu } from 'react-native-paper';
 
 const BORDER_RADIUS = 12;
 
@@ -15,6 +15,7 @@ interface TodoEditorProps {
     notes?: string;
     dueDate?: string;
     notifyEnabled?: boolean;
+    repeat?: RepeatType;
   }) => void;
   onCancel: () => void;
 }
@@ -45,6 +46,8 @@ export default function TodoEditor({
     return false;
   });
   const [notifyEnabled, setNotifyEnabled] = useState<boolean>(todo?.notifyEnabled || false);
+  const [repeat, setRepeat] = useState<RepeatType>(todo?.repeat || 'never');
+  const [showRepeatMenu, setShowRepeatMenu] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [titleError, setTitleError] = useState<string | null>(null);
@@ -81,6 +84,7 @@ export default function TodoEditor({
       notes: notes.trim() || undefined,
       dueDate: finalDueDate ? createDateString(finalDueDate) : undefined,
       notifyEnabled: notifyEnabled && !!finalDueDate, // Only enable if there's a due date
+      repeat: repeat,
     });
   };
 
@@ -310,6 +314,60 @@ export default function TodoEditor({
               disabled={!dueDate}
             />
           </View>
+
+          <View style={styles.repeatContainer}>
+            <Text variant="bodyMedium">Repeat</Text>
+            <Menu
+              visible={showRepeatMenu}
+              onDismiss={() => setShowRepeatMenu(false)}
+              anchor={
+                <Button
+                  mode="outlined"
+                  onPress={() => setShowRepeatMenu(true)}
+                  style={styles.repeatButton}
+                  compact
+                >
+                  {repeat === 'never' ? 'Never' :
+                   repeat === 'daily' ? 'Daily' :
+                   repeat === 'weekdays' ? 'Weekdays' :
+                   'Weekly'}
+                </Button>
+              }
+            >
+              <Menu.Item
+                onPress={() => {
+                  setRepeat('never');
+                  setShowRepeatMenu(false);
+                }}
+                title="Never"
+                leadingIcon={repeat === 'never' ? 'check' : undefined}
+              />
+              <Menu.Item
+                onPress={() => {
+                  setRepeat('daily');
+                  setShowRepeatMenu(false);
+                }}
+                title="Daily"
+                leadingIcon={repeat === 'daily' ? 'check' : undefined}
+              />
+              <Menu.Item
+                onPress={() => {
+                  setRepeat('weekdays');
+                  setShowRepeatMenu(false);
+                }}
+                title="Weekdays"
+                leadingIcon={repeat === 'weekdays' ? 'check' : undefined}
+              />
+              <Menu.Item
+                onPress={() => {
+                  setRepeat('weekly');
+                  setShowRepeatMenu(false);
+                }}
+                title="Weekly"
+                leadingIcon={repeat === 'weekly' ? 'check' : undefined}
+              />
+            </Menu>
+          </View>
         </Surface>
       </ScrollView>
 
@@ -404,5 +462,17 @@ const styles = StyleSheet.create({
   actionButton: {
     flex: 1,
     borderRadius: BORDER_RADIUS,
+  },
+  repeatContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    marginTop: 8,
+  },
+  repeatButton: {
+    borderRadius: BORDER_RADIUS,
+    minWidth: 100,
   },
 });

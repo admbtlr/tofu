@@ -1,4 +1,5 @@
 export type TodoId = string;
+export type RepeatType = 'never' | 'daily' | 'weekdays' | 'weekly';
 
 export interface Todo {
   id: TodoId;
@@ -10,6 +11,7 @@ export interface Todo {
   completed: boolean;
   notifyEnabled?: boolean; // Whether to send notification for this todo
   notificationId?: string; // ID of the scheduled notification
+  repeat?: RepeatType; // How often this todo repeats
 }
 
 export type FilterType = 'today' | 'all' | 'completed';

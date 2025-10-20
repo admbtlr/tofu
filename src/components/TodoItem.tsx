@@ -4,7 +4,7 @@ import { formatDate, formatTime, isOverdue } from '@/utils/date';
 import React, { useEffect, useRef } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { IconButton, List, Text, useTheme } from 'react-native-paper';
+import { Icon, IconButton, List, Text, useTheme } from 'react-native-paper';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -147,7 +147,7 @@ export default React.memo(function TodoItem({
   const formatDueDate = (dateString: string) => {
     const formattedDate = formatDate(dateString);
     if (hasTime) {
-      return `${formattedDate} at ${formatTime(dateString)}`;
+      return `${formattedDate}, ${formatTime(dateString)}`;
     }
     return formattedDate;
   };
@@ -175,17 +175,34 @@ export default React.memo(function TodoItem({
                   {todo.notes}
                 </Text>
               )}
-              {todo.dueDate && (
-                <Text
-                  variant="bodySmall"
-                  style={[
-                    styles.dueDate,
-                    isItemOverdue && { color: theme.colors.error },
-                  ]}
-                >
-                  Due: {formatDueDate(todo.dueDate)}
-                </Text>
-              )}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {todo.dueDate && (
+                  <Text
+                    variant="bodySmall"
+                    style={[
+                      styles.dueDate,
+                      isItemOverdue && { color: theme.colors.error },
+                      { marginRight: 6 },
+                    ]}
+                  >
+                    {formatDueDate(todo.dueDate)}
+                  </Text>
+                )}
+                {todo.repeat && todo.repeat !== 'never' && (
+                  <>
+                    <Icon source="repeat-variant" size={16} />
+                    <Text
+                      style={{
+                        ...styles.dueDate,
+                        marginLeft: 2,
+                      }}
+                    >
+                      {todo.repeat.charAt(0).toUpperCase() +
+                        todo.repeat.slice(1)}
+                    </Text>
+                  </>
+                )}
+              </View>
             </View>
           }
           left={() => (
@@ -264,5 +281,6 @@ const styles = StyleSheet.create({
   },
   checkbox: {
     margin: 0,
+    marginTop: -8,
   },
 });
