@@ -13,6 +13,7 @@ import {
   ListRenderItem,
   RefreshControl,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { Chip, Portal, Snackbar, useTheme, FAB } from 'react-native-paper';
@@ -49,6 +50,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       // Refresh data when screen comes into focus
     }, [])
   );
+
+  const dimensions = useWindowDimensions();
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -113,7 +116,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       case 'today':
         return {
           title: 'Nothing Due Today',
-          subtitle: 'You\'re all caught up!',
+          subtitle: "You're all caught up!",
           icon: 'check-circle-outline',
           actionLabel: 'Add Todo',
           onActionPress: handleAddTodo,
@@ -145,7 +148,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.background,
+          paddingHorizontal:
+            dimensions.width > 800 ? (dimensions.width - 800) / 2 : 0,
+        },
+      ]}
     >
       <Header title="Tofu" showThemeToggle showLogout />
 
