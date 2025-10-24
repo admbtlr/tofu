@@ -217,10 +217,7 @@ export default React.memo(function TodoItem({
             />
           )}
           onPress={onPress}
-          style={[
-            styles.item,
-            todo.completed && { backgroundColor: theme.colors.surfaceVariant },
-          ]}
+          style={[styles.item]}
           accessible={true}
           accessibilityLabel={`Todo: ${todo.title}${
             todo.completed ? ', completed' : ''
