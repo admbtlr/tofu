@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { PaperProvider, ActivityIndicator } from 'react-native-paper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { View, StyleSheet } from 'react-native';
+import { useFonts } from 'expo-font';
 import { useCurrentTheme, useThemeStore } from '@/app/theme/theme';
 import { useAuthStore } from '@/store/useAuthStore';
 import { initializeTodoStore } from '@/store/useTodoStore';
@@ -35,7 +36,12 @@ function AppContent() {
 
           {/* Show loading screen while checking auth state */}
           {!initialized ? (
-            <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
+            <View
+              style={[
+                styles.loadingContainer,
+                { backgroundColor: theme.colors.background },
+              ]}
+            >
               <ActivityIndicator size="large" color={theme.colors.primary} />
             </View>
           ) : !user ? (
@@ -56,14 +62,17 @@ function AppContent() {
 export default function App() {
   const { initialize: initializeTheme } = useThemeStore();
   const { initialize: initializeAuth, user } = useAuthStore();
+  const theme = useCurrentTheme();
+
+  const [fontsLoaded] = useFonts({
+    iAWriterQuattroS: require('../../assets/fonts/iAWriterQuattroS-Regular.ttf'),
+    'iAWriterQuattroS-Bold': require('../../assets/fonts/iAWriterQuattroS-Bold.ttf'),
+  });
 
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        await Promise.all([
-          initializeTheme(),
-          initializeAuth(),
-        ]);
+        await Promise.all([initializeTheme(), initializeAuth()]);
       } catch (error) {
         console.error('Failed to initialize app:', error);
       }
@@ -89,6 +98,20 @@ export default function App() {
 
     initializeUserData();
   }, [user]);
+
+  // Show loading screen while fonts are loading
+  if (!fontsLoaded) {
+    return (
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
 
   return <AppContent />;
 }

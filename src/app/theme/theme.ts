@@ -3,6 +3,45 @@ import { useColorScheme } from 'react-native';
 import { create } from 'zustand';
 import { loadTheme, saveTheme } from '@/storage/todoStorage';
 
+const customFont = {
+  bodyLarge: {
+    ...MD3LightTheme.fonts.bodyLarge,
+    fontFamily: 'iAWriterQuattroS',
+  },
+  bodyMedium: {
+    ...MD3LightTheme.fonts.bodyMedium,
+    fontFamily: 'iAWriterQuattroS',
+  },
+  bodySmall: {
+    ...MD3LightTheme.fonts.bodySmall,
+    fontFamily: 'iAWriterQuattroS',
+  },
+  labelLarge: {
+    ...MD3LightTheme.fonts.labelLarge,
+    fontFamily: 'iAWriterQuattroS',
+  },
+  labelMedium: {
+    ...MD3LightTheme.fonts.labelMedium,
+    fontFamily: 'iAWriterQuattroS',
+  },
+  labelSmall: {
+    ...MD3LightTheme.fonts.labelSmall,
+    fontFamily: 'iAWriterQuattroS',
+  },
+  titleLarge: {
+    ...MD3LightTheme.fonts.titleLarge,
+    fontFamily: 'iAWriterQuattroS',
+  },
+  titleMedium: {
+    ...MD3LightTheme.fonts.titleMedium,
+    fontFamily: 'iAWriterQuattroS',
+  },
+  titleSmall: {
+    ...MD3LightTheme.fonts.titleSmall,
+    fontFamily: 'iAWriterQuattroS',
+  },
+};
+
 export const lightTheme: MD3Theme = {
   ...MD3LightTheme,
   colors: {
@@ -13,6 +52,12 @@ export const lightTheme: MD3Theme = {
     onPrimaryContainer: 'rgb(0, 32, 66)',
     background: 'rgb(225, 225, 220)',
     onSurface: 'rgb(60, 30, 10)',
+    surfaceVariant: 'rgb(255, 255, 255)',
+    onSurfaceVariant: 'rgb(60, 30, 10)',
+  },
+  fonts: {
+    ...MD3LightTheme.fonts,
+    ...customFont,
   },
 };
 
@@ -32,6 +77,10 @@ export const darkTheme: MD3Theme = {
     outlineVariant: 'rgb(68, 71, 78)',
     background: 'rgb(16, 16, 20)',
     onBackground: 'rgb(227, 226, 230)',
+  },
+  fonts: {
+    ...MD3DarkTheme.fonts,
+    ...customFont,
   },
 };
 
