@@ -52,7 +52,7 @@ export const lightTheme: MD3Theme = {
     onPrimaryContainer: 'rgb(0, 32, 66)',
     background: 'rgb(225, 225, 220)',
     onSurface: 'rgb(60, 30, 10)',
-    surfaceVariant: 'rgb(255, 255, 255)',
+    secondaryContainer: 'rgb(230, 215, 205)',
     onSurfaceVariant: 'rgb(60, 30, 10)',
   },
   fonts: {
