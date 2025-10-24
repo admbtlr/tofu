@@ -30,15 +30,15 @@ const customFont = {
   },
   titleLarge: {
     ...MD3LightTheme.fonts.titleLarge,
-    fontFamily: 'iAWriterQuattroS',
+    fontFamily: 'iAWriterQuattroS-Bold',
   },
   titleMedium: {
     ...MD3LightTheme.fonts.titleMedium,
-    fontFamily: 'iAWriterQuattroS',
+    fontFamily: 'iAWriterQuattroS-Bold',
   },
   titleSmall: {
     ...MD3LightTheme.fonts.titleSmall,
-    fontFamily: 'iAWriterQuattroS',
+    fontFamily: 'iAWriterQuattroS-Bold',
   },
 };
 
