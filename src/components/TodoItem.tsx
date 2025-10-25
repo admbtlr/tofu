@@ -245,6 +245,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     lineHeight: 22,
+    opacity: 0.9,
   },
   description: {
     marginTop: 4,
