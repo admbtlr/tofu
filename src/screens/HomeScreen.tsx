@@ -4,9 +4,11 @@ import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import TodoItem from '@/components/TodoItem';
 import { useTodoStore } from '@/store/useTodoStore';
+import { useListStore } from '@/store/useListStore';
 import { FilterType, Todo } from '@/types/todo';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { DrawerNavigationProp } from '@react-navigation/drawer';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import {
   FlatList,
@@ -21,7 +23,11 @@ import { Chip, Portal, Snackbar, useTheme, FAB } from 'react-native-paper';
 
 const BORDER_RADIUS = 12;
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
+type HomeScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Home'
+> &
+  DrawerNavigationProp<any>;
 
 interface HomeScreenProps {
   navigation: HomeScreenNavigationProp;
@@ -46,7 +52,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     deleteTodo,
   } = useTodoStore();
 
-  const todos = visibleTodos();
+  const { lists, selectedListId } = useListStore();
+
+  const todos = visibleTodos(selectedListId);
+  const list = lists.find(l => l.id === selectedListId);
+  const title = list?.name || 'Everything';
 
   useFocusEffect(
     useCallback(() => {
@@ -169,12 +179,16 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         styles.container,
         {
           backgroundColor: theme.colors.background,
-          paddingHorizontal:
-            dimensions.width > 800 ? (dimensions.width - 800) / 2 : 0,
+          // paddingHorizontal:
+          //   dimensions.width > 800 ? (dimensions.width - 800) / 2 : 0,
         },
       ]}
     >
-      <Header title="Tofu" showThemeToggle showLogout />
+      <Header
+        title={title || 'Tofu'}
+        showMenu={dimensions.width <= 800}
+        onMenuPress={() => navigation.openDrawer()}
+      />
 
       <View style={styles.filtersContainer}>
         <Animated.View

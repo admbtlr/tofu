@@ -36,6 +36,7 @@ export default function EditTodoScreen({
     dueDate?: string;
     notifyEnabled?: boolean;
     repeat?: RepeatType;
+    listId?: string;
   }) => {
     if (isEditing && todo) {
       updateTodo(todo.id, todoData);
@@ -61,8 +62,8 @@ export default function EditTodoScreen({
         styles.container,
         {
           backgroundColor: theme.colors.background,
-          paddingHorizontal:
-            dimensions.width > 800 ? (dimensions.width - 800) / 2 : 0,
+          // paddingHorizontal:
+          //   dimensions.width > 800 ? (dimensions.width - 800) / 2 : 0,
         },
       ]}
     >

@@ -9,6 +9,7 @@ import { useFonts } from 'expo-font';
 import { useCurrentTheme, useThemeStore } from '@/app/theme/theme';
 import { useAuthStore } from '@/store/useAuthStore';
 import { initializeTodoStore } from '@/store/useTodoStore';
+import { initializeListStore } from '@/store/useListStore';
 import { useSupabaseSync } from '@/hooks/useSupabaseSync';
 import { requestNotificationPermissions } from '@/utils/notifications';
 import RootNavigator from '@/app/navigation/RootNavigator';
@@ -81,12 +82,13 @@ export default function App() {
     initializeApp();
   }, [initializeTheme, initializeAuth]);
 
-  // Initialize todos and notifications only when user is authenticated
+  // Initialize todos, lists, and notifications only when user is authenticated
   useEffect(() => {
     const initializeUserData = async () => {
       if (user) {
         try {
           await Promise.all([
+            initializeListStore(),
             initializeTodoStore(),
             requestNotificationPermissions(),
           ]);

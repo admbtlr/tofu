@@ -12,6 +12,7 @@ export interface Todo {
   notifyEnabled?: boolean; // Whether to send notification for this todo
   notificationId?: string; // ID of the scheduled notification
   repeat?: RepeatType; // How often this todo repeats
+  listId?: string; // The list this todo belongs to
 }
 
 export type FilterType = 'today' | 'all' | 'completed';
@@ -37,5 +38,5 @@ export interface TodoStore {
   removePendingRemoval: (id: TodoId) => void;
 
   // Computed
-  visibleTodos: () => Todo[];
+  visibleTodos: (selectedListId?: string) => Todo[];
 }

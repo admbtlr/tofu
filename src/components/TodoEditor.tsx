@@ -5,6 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View, Platform } from 'react-native';
 import { Button, Surface, Text, TextInput, useTheme, Switch, Menu } from 'react-native-paper';
+import { useListStore } from '@/store/useListStore';
 
 const BORDER_RADIUS = 12;
 
@@ -16,6 +17,7 @@ interface TodoEditorProps {
     dueDate?: string;
     notifyEnabled?: boolean;
     repeat?: RepeatType;
+    listId?: string;
   }) => void;
   onCancel: () => void;
 }
@@ -53,6 +55,10 @@ export default function TodoEditor({
   const [titleError, setTitleError] = useState<string | null>(null);
   const [notesError, setNotesError] = useState<string | null>(null);
 
+  const { lists, selectedListId } = useListStore();
+  const [listId, setListId] = useState<string>(todo?.listId || selectedListId || '');
+  const [showListMenu, setShowListMenu] = useState(false);
+
   useEffect(() => {
     const titleValidation = validateTodoTitle(title);
     setTitleError(titleValidation);
@@ -85,6 +91,7 @@ export default function TodoEditor({
       dueDate: finalDueDate ? createDateString(finalDueDate) : undefined,
       notifyEnabled: notifyEnabled && !!finalDueDate, // Only enable if there's a due date
       repeat: repeat,
+      listId: listId || undefined,
     });
   };
 
@@ -366,6 +373,36 @@ export default function TodoEditor({
                 title="Weekly"
                 leadingIcon={repeat === 'weekly' ? 'check' : undefined}
               />
+            </Menu>
+          </View>
+
+          <View style={styles.repeatContainer}>
+            <Text variant="bodyMedium">List</Text>
+            <Menu
+              visible={showListMenu}
+              onDismiss={() => setShowListMenu(false)}
+              anchor={
+                <Button
+                  mode="outlined"
+                  onPress={() => setShowListMenu(true)}
+                  style={styles.repeatButton}
+                  compact
+                >
+                  {lists.find(l => l.id === listId)?.name || 'Select List'}
+                </Button>
+              }
+            >
+              {lists.map(list => (
+                <Menu.Item
+                  key={list.id}
+                  onPress={() => {
+                    setListId(list.id);
+                    setShowListMenu(false);
+                  }}
+                  title={list.name}
+                  leadingIcon={listId === list.id ? 'check' : undefined}
+                />
+              ))}
             </Menu>
           </View>
         </Surface>

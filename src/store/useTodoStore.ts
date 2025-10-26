@@ -51,9 +51,17 @@ const filterTodos = (
   todos: Todo[],
   query: string,
   filter: FilterType,
-  pendingRemovalIds: Set<string>
+  pendingRemovalIds: Set<string>,
+  selectedListId?: string
 ): Todo[] => {
   let filtered = todos;
+
+  // Apply list filter (unless "Everything" is selected)
+  const { EVERYTHING_LIST_ID } = require('@/types/list');
+  if (selectedListId && selectedListId !== EVERYTHING_LIST_ID) {
+    // Show todos that belong to this list OR have no list assigned (for backwards compatibility)
+    filtered = filtered.filter(todo => todo.listId === selectedListId || !todo.listId);
+  }
 
   // Apply text search
   if (query.trim()) {
@@ -363,9 +371,9 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
     });
   },
 
-  visibleTodos: () => {
+  visibleTodos: (selectedListId?: string) => {
     const { todos, query, filter, sort, pendingRemovalIds } = get();
-    const filtered = filterTodos(todos, query, filter, pendingRemovalIds);
+    const filtered = filterTodos(todos, query, filter, pendingRemovalIds, selectedListId);
     return sortTodos(filtered, sort, pendingRemovalIds);
   },
 }));

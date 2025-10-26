@@ -109,5 +109,14 @@ export type TodoRow = {
   notify_enabled: boolean | null;
   notification_id: string | null;
   repeat: string | null;
+  list_id: string | null;
+  user_id: string | null;
+};
+
+export type ListRow = {
+  id: string;
+  name: string;
+  is_default: boolean;
+  created_at: string;
   user_id: string | null;
 };

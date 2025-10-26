@@ -11,6 +11,8 @@ interface HeaderProps {
   onBackPress?: () => void;
   showThemeToggle?: boolean;
   showLogout?: boolean;
+  showMenu?: boolean;
+  onMenuPress?: () => void;
 }
 
 export default function Header({
@@ -21,6 +23,8 @@ export default function Header({
   onBackPress,
   showThemeToggle = false,
   showLogout = false,
+  showMenu = false,
+  onMenuPress,
 }: HeaderProps) {
   const theme = useTheme();
   const [menuVisible, setMenuVisible] = React.useState(false);
@@ -56,6 +60,13 @@ export default function Header({
 
   return (
     <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
+      {showMenu && (
+        <IconButton
+          icon="menu"
+          onPress={onMenuPress}
+          accessibilityLabel="Open menu"
+        />
+      )}
       {showThemeToggle && (
         <Menu
           visible={menuVisible}
