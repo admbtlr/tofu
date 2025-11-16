@@ -66,8 +66,8 @@ export default function App() {
   const theme = useCurrentTheme();
 
   const [fontsLoaded] = useFonts({
-    iAWriterQuattroS: require('../../assets/fonts/iAWriterQuattroS-Regular.ttf'),
-    'iAWriterQuattroS-Bold': require('../../assets/fonts/iAWriterQuattroS-Bold.ttf'),
+    Body: require('../../assets/fonts/IBMPlexSans-Medium.ttf'),
+    Title: require('../../assets/fonts/Fraunces_72pt_SuperSoft-Light.ttf'),
   });
 
   useEffect(() => {

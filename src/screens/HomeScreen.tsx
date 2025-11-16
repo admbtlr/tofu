@@ -9,7 +9,7 @@ import { FilterType, Todo } from '@/types/todo';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import {
   FlatList,
   ListRenderItem,
@@ -19,9 +19,7 @@ import {
   View,
   Animated,
 } from 'react-native';
-import { Chip, Portal, Snackbar, useTheme, FAB } from 'react-native-paper';
-
-const BORDER_RADIUS = 12;
+import { SegmentedButtons, Portal, Snackbar, useTheme, FAB } from 'react-native-paper';
 
 type HomeScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -41,6 +39,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [lastDeletedTodo, setLastDeletedTodo] = useState<Todo | null>(null);
   const [searchExpanded, setSearchExpanded] = useState(false);
   const searchRowAnim = useRef(new Animated.Value(0)).current;
+  const searchVerticalAnim = useRef(new Animated.Value(0)).current;
 
   const {
     query,
@@ -107,18 +106,48 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   };
 
   const handleSearchToggle = () => {
-    setSearchExpanded(!searchExpanded);
+    const newExpanded = !searchExpanded;
+    
+    if (newExpanded) {
+      // When expanding: first move down and shift content, then set expanded state for horizontal animation
+      Animated.parallel([
+        Animated.timing(searchVerticalAnim, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.timing(searchRowAnim, {
+          toValue: !isTablet ? 1 : 0,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // Set expanded state after vertical movement completes to trigger horizontal expansion
+        setSearchExpanded(true);
+      });
+    } else {
+      // When collapsing: first set collapsed state, then move up after horizontal collapse
+      setSearchExpanded(false);
+      setTimeout(() => {
+        Animated.parallel([
+          Animated.timing(searchRowAnim, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: true,
+          }),
+          Animated.timing(searchVerticalAnim, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }, 300); // Wait for horizontal collapse to complete
+    }
   };
 
   const isTablet = dimensions.width > 600;
 
-  useEffect(() => {
-    Animated.timing(searchRowAnim, {
-      toValue: searchExpanded && !isTablet ? 1 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [searchExpanded, isTablet]);
+  // Remove the useEffect since animation is now handled in handleSearchToggle
 
   const renderTodoItem: ListRenderItem<Todo> = ({ item }) => (
     <TodoItem
@@ -156,7 +185,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           actionLabel: 'Add Todo',
           onActionPress: handleAddTodo,
         };
-      case 'completed':
+      case 'done':
         return {
           title: 'No Completed Todos',
           subtitle: 'Complete some todos to see them here',
@@ -206,72 +235,42 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             },
           ]}
         >
-          <Chip
-            selected={filter === 'today'}
-            onPress={() => handleFilterPress('today')}
-            style={[
-              styles.filterChip,
-              { borderRadius: BORDER_RADIUS },
-              filter === 'today' && {
-                backgroundColor: theme.colors.primary,
-                elevation: 2,
+          <SegmentedButtons
+            value={filter}
+            onValueChange={(value) => handleFilterPress(value as FilterType)}
+            buttons={[
+              {
+                value: 'today',
+                label: 'Today',
+              },
+              {
+                value: 'all',
+                label: 'All',
+              },
+              {
+                value: 'done',
+                label: 'Done',
               },
             ]}
-            textStyle={
-              filter === 'today' && {
-                color: theme.colors.onPrimary,
-                fontWeight: '600',
-              }
-            }
-            showSelectedCheck={false}
-          >
-            Today
-          </Chip>
-          <Chip
-            selected={filter === 'all'}
-            onPress={() => handleFilterPress('all')}
-            style={[
-              styles.filterChip,
-              { borderRadius: BORDER_RADIUS },
-              filter === 'all' && {
-                backgroundColor: theme.colors.primary,
-                elevation: 2,
-              },
-            ]}
-            textStyle={
-              filter === 'all' && {
-                color: theme.colors.onPrimary,
-                fontWeight: '600',
-              }
-            }
-            showSelectedCheck={false}
-          >
-            All
-          </Chip>
-          <Chip
-            selected={filter === 'completed'}
-            onPress={() => handleFilterPress('completed')}
-            style={[
-              styles.filterChip,
-              { borderRadius: BORDER_RADIUS },
-              filter === 'completed' && {
-                backgroundColor: theme.colors.primary,
-                elevation: 2,
-              },
-            ]}
-            textStyle={
-              filter === 'completed' && {
-                color: theme.colors.onPrimary,
-                fontWeight: '600',
-              }
-            }
-            showSelectedCheck={false}
-          >
-            Completed
-          </Chip>
+            style={styles.segmentedButtons}
+          />
         </Animated.View>
 
-        <View style={styles.searchIconContainer}>
+        <Animated.View 
+          style={[
+            styles.searchIconContainer,
+            {
+              transform: [
+                {
+                  translateY: searchVerticalAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, 56], // Move from initial position (header level) down to filters level
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
           <SearchBar
             value={query}
             onChangeText={setQuery}
@@ -279,7 +278,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             onToggle={handleSearchToggle}
             maxWidth={isTablet ? 400 : dimensions.width - 14}
           />
-        </View>
+        </Animated.View>
       </View>
 
       <Animated.View
@@ -361,12 +360,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 2,
   },
-  filterChip: {
-    marginRight: 8,
+  segmentedButtons: {
+    flex: 1,
   },
   searchIconContainer: {
     position: 'absolute',
-    top: 0,
+    top: -56, // Start above filters container at header level
     right: 6,
     zIndex: 10,
   },

@@ -6,39 +6,41 @@ import { loadTheme, saveTheme } from '@/storage/todoStorage';
 const customFont = {
   bodyLarge: {
     ...MD3LightTheme.fonts.bodyLarge,
-    fontFamily: 'iAWriterQuattroS',
+    fontFamily: 'Body',
   },
   bodyMedium: {
     ...MD3LightTheme.fonts.bodyMedium,
-    fontFamily: 'iAWriterQuattroS',
+    fontFamily: 'Body',
   },
   bodySmall: {
     ...MD3LightTheme.fonts.bodySmall,
-    fontFamily: 'iAWriterQuattroS',
+    fontFamily: 'Body',
   },
   labelLarge: {
     ...MD3LightTheme.fonts.labelLarge,
-    fontFamily: 'iAWriterQuattroS',
+    fontFamily: 'Body',
   },
   labelMedium: {
     ...MD3LightTheme.fonts.labelMedium,
-    fontFamily: 'iAWriterQuattroS',
+    fontFamily: 'Body',
   },
   labelSmall: {
     ...MD3LightTheme.fonts.labelSmall,
-    fontFamily: 'iAWriterQuattroS',
+    fontFamily: 'Body',
   },
   titleLarge: {
     ...MD3LightTheme.fonts.titleLarge,
-    fontFamily: 'iAWriterQuattroS-Bold',
+    fontFamily: 'Title',
+    fontSize: 28,
+    // opacity: 0.5,
   },
   titleMedium: {
     ...MD3LightTheme.fonts.titleMedium,
-    fontFamily: 'iAWriterQuattroS-Bold',
+    fontFamily: 'Title',
   },
   titleSmall: {
     ...MD3LightTheme.fonts.titleSmall,
-    fontFamily: 'iAWriterQuattroS-Bold',
+    fontFamily: 'Title',
   },
 };
 
@@ -50,7 +52,8 @@ export const lightTheme: MD3Theme = {
     onPrimary: 'rgb(255, 255, 255)',
     primaryContainer: 'rgb(208, 237, 255)',
     onPrimaryContainer: 'rgb(0, 32, 66)',
-    background: 'rgb(225, 225, 220)',
+    background: 'rgb(245, 245, 240)',
+    surface: 'rgb(225, 225, 220)',
     onSurface: 'rgb(60, 30, 10)',
     secondaryContainer: 'rgb(230, 215, 205)',
     onSurfaceVariant: 'rgb(60, 30, 60)',

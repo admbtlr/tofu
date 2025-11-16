@@ -15,7 +15,7 @@ export interface Todo {
   listId?: string; // The list this todo belongs to
 }
 
-export type FilterType = 'today' | 'all' | 'completed';
+export type FilterType = 'today' | 'all' | 'done';
 export type SortType = 'default' | 'dueDate' | 'alphabetical';
 
 export interface TodoStore {

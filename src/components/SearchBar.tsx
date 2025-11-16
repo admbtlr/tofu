@@ -29,31 +29,26 @@ export default function SearchBar({
   useEffect(() => {
     Animated.timing(widthAnim, {
       toValue: expanded ? 1 : 0,
-      duration: 300,
-      useNativeDriver: false,
+      duration: 250,
+      useNativeDriver: false, // Width animation cannot use native driver
     }).start();
 
     if (expanded) {
       // Focus input when expanded
       setTimeout(() => {
         inputRef.current?.focus();
-      }, 100);
+      }, 300);
     } else {
       // Clear search when collapsed
       if (value) {
         onChangeText('');
       }
     }
-  }, [expanded]);
+  }, [expanded, value, onChangeText, widthAnim]);
 
   const width = widthAnim.interpolate({
     inputRange: [0, 1],
     outputRange: [48, maxWidth], // Icon size to full width
-  });
-
-  const iconOpacity = widthAnim.interpolate({
-    inputRange: [0, 0.3, 1],
-    outputRange: [1, 0, 0],
   });
 
   const inputOpacity = widthAnim.interpolate({

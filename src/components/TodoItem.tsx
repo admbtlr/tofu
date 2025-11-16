@@ -40,7 +40,7 @@ export default React.memo(function TodoItem({
     const justCompleted = !wasCompleted.current && todo.completed;
     wasCompleted.current = todo.completed;
 
-    if (justCompleted && filter !== 'completed') {
+    if (justCompleted && filter !== 'done') {
       // Show greyed out state immediately
       opacity.value = withSpring(0.5);
       scale.value = withSpring(0.98);
@@ -253,13 +253,14 @@ const styles = StyleSheet.create({
   },
   notes: {
     marginBottom: 4,
-    opacity: 0.7,
+    opacity: 0.5,
     lineHeight: 18,
+    letterSpacing: -0.3,
   },
   dueDate: {
     fontSize: 12,
     opacity: 0.8,
-    lineHeight: 16,
+    lineHeight: 20,
     paddingBottom: 2,
   },
   deleteAction: {

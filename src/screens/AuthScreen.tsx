@@ -1,11 +1,27 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Text, TextInput, Button, useTheme, HelperText } from 'react-native-paper';
+import {
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import {
+  Text,
+  TextInput,
+  Button,
+  useTheme,
+  HelperText,
+} from 'react-native-paper';
 import { useAuthStore } from '@/store/useAuthStore';
 
 export default function AuthScreen() {
   const theme = useTheme();
-  const { signIn: authSignIn, signUp: authSignUp, loading: authLoading } = useAuthStore();
+  const {
+    signIn: authSignIn,
+    signUp: authSignUp,
+    loading: authLoading,
+  } = useAuthStore();
 
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -81,10 +97,16 @@ export default function AuthScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.content}>
-          <Text variant="displaySmall" style={[styles.title, { color: theme.colors.onBackground }]}>
+          <Text
+            variant="titleLarge"
+            style={[styles.title, { color: theme.colors.onBackground }]}
+          >
             Tofu
           </Text>
-          <Text variant="titleMedium" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
+          <Text
+            variant="bodyLarge"
+            style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}
+          >
             {isSignUp ? 'Create your account' : 'Welcome back'}
           </Text>
 
@@ -150,7 +172,9 @@ export default function AuthScreen() {
               disabled={loading}
               style={styles.toggleButton}
             >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+              {isSignUp
+                ? 'Already have an account? Sign In'
+                : "Don't have an account? Sign Up"}
             </Button>
           </View>
         </View>
@@ -176,7 +200,8 @@ const styles = StyleSheet.create({
   title: {
     textAlign: 'center',
     marginBottom: 8,
-    fontWeight: 'bold',
+    fontSize: 48,
+    lineHeight: 48,
   },
   subtitle: {
     textAlign: 'center',

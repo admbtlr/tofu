@@ -13,6 +13,7 @@ interface HeaderProps {
   showLogout?: boolean;
   showMenu?: boolean;
   onMenuPress?: () => void;
+  isSurface?: boolean;
 }
 
 export default function Header({
@@ -25,6 +26,7 @@ export default function Header({
   showLogout = false,
   showMenu = false,
   onMenuPress,
+  isSurface = false,
 }: HeaderProps) {
   const theme = useTheme();
   const [menuVisible, setMenuVisible] = React.useState(false);
@@ -59,7 +61,13 @@ export default function Header({
   };
 
   return (
-    <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
+    <Appbar.Header
+      style={{
+        backgroundColor: isSurface
+          ? theme.colors.surface
+          : theme.colors.background,
+      }}
+    >
       {showMenu && (
         <IconButton
           icon="menu"

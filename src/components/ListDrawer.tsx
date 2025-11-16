@@ -85,18 +85,24 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
 
   return (
     <>
-      <Header title="Your Lists" showLogout />
+      <Header title="Your Lists" isSurface showLogout />
       <DrawerContentScrollView
         {...props}
         style={{
           ...styles.drawerSection,
-          backgroundColor: theme.colors.background,
+          backgroundColor: theme.colors.surface,
         }}
       >
         {/* Everything entry */}
         <List.Item
           title={getLabel(EVERYTHING_LIST_ID)}
-          left={props => <List.Icon {...props} icon="inbox-multiple" />}
+          left={props => (
+            <List.Icon
+              {...props}
+              color={theme.colors.primary}
+              icon="inbox-multiple"
+            />
+          )}
           onPress={() => handleSelectList(EVERYTHING_LIST_ID)}
           style={[
             styles.listItem,
@@ -111,7 +117,13 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
           <List.Item
             key={list.id}
             title={getLabel(list.id)}
-            left={props => <List.Icon {...props} icon="format-list-bulleted" />}
+            left={props => (
+              <List.Icon
+                {...props}
+                color={theme.colors.primary}
+                icon="format-list-bulleted"
+              />
+            )}
             right={() => (
               <View style={styles.rightContainer}>
                 {!list.isDefault && (
@@ -136,7 +148,9 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
         {/* Add new list button */}
         <List.Item
           title="Add List"
-          left={props => <List.Icon {...props} icon="plus" />}
+          left={props => (
+            <List.Icon {...props} color={theme.colors.primary} icon="plus" />
+          )}
           onPress={() => setAddDialogVisible(true)}
           style={styles.listItem}
         />

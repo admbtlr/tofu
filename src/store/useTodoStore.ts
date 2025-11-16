@@ -97,7 +97,7 @@ const filterTodos = (
         return !todo.completed;
       });
       break;
-    case 'completed':
+    case 'done':
       // Show all completed todos
       filtered = filtered.filter(todo => todo.completed);
       break;
@@ -265,8 +265,8 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
 
     const completed = !todo.completed;
 
-    // If completing (not uncompleting) and not in completed filter, add to pending removal
-    if (completed && state.filter !== 'completed') {
+    // If completing (not uncompleting) and not in done filter, add to pending removal
+    if (completed && state.filter !== 'done') {
       state.addPendingRemoval(id);
     }
 
