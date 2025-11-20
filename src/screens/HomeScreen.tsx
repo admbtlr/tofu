@@ -174,8 +174,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           title: 'Nothing Due Today',
           subtitle: "You're all caught up!",
           icon: 'check-circle-outline',
-          actionLabel: 'Add Todo',
-          onActionPress: handleAddTodo,
         };
       case 'all':
         return {
@@ -359,9 +357,11 @@ const styles = StyleSheet.create({
   filters: {
     flexDirection: 'row',
     gap: 2,
+    justifyContent: 'center',
   },
   segmentedButtons: {
     flex: 1,
+    maxWidth: 320,
   },
   searchIconContainer: {
     position: 'absolute',

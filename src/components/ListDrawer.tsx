@@ -84,14 +84,11 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
   };
 
   return (
-    <>
-      <Header title="Your Lists" isSurface showLogout />
+    <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>
       <DrawerContentScrollView
         {...props}
-        style={{
-          ...styles.drawerSection,
-          backgroundColor: theme.colors.surface,
-        }}
+        style={styles.drawerSection}
+        contentContainerStyle={{ flexGrow: 1 }}
       >
         {/* Everything entry */}
         <List.Item
@@ -131,6 +128,11 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
                     icon="delete-outline"
                     size={20}
                     onPress={() => handleDeletePress(list.id)}
+                    style={{
+                      padding: 0,
+                      margin: 0,
+                      height: 24
+                    }}
                   />
                 )}
               </View>
@@ -144,8 +146,10 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
             ]}
           />
         ))}
+      </DrawerContentScrollView>
 
-        {/* Add new list button */}
+      {/* Add new list button - now at the bottom */}
+      <View style={[styles.addListContainer, { backgroundColor: theme.colors.surface }]}>
         <List.Item
           title="Add List"
           left={props => (
@@ -154,7 +158,7 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
           onPress={() => setAddDialogVisible(true)}
           style={styles.listItem}
         />
-      </DrawerContentScrollView>
+      </View>
 
       {/* Delete confirmation dialog */}
       <Portal>
@@ -220,14 +224,14 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   drawerSection: {
     flex: 1,
-    // paddingTop: 16,
+    paddingTop: 32,
   },
   listItem: {
     paddingVertical: 8,
@@ -247,5 +251,10 @@ const styles = StyleSheet.create({
   },
   input: {
     marginTop: 8,
+  },
+  addListContainer: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.12)',
+    paddingBottom: 32,
   },
 });
