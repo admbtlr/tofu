@@ -289,6 +289,7 @@ export const useTodoStore = create<TodoStore>((set, get) => ({
           completed: false,
           notifyEnabled: todo.notifyEnabled,
           repeat: todo.repeat,
+          listId: todo.listId,
         };
 
         // Schedule notification for the new todo if enabled
