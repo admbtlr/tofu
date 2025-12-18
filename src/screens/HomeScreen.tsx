@@ -18,8 +18,10 @@ import {
   useWindowDimensions,
   View,
   Animated,
+  Platform,
 } from 'react-native';
 import { SegmentedButtons, Portal, Snackbar, useTheme, FAB } from 'react-native-paper';
+import { isMac, spacing } from '@/app/theme/theme';
 
 type HomeScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -107,7 +109,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const handleSearchToggle = () => {
     const newExpanded = !searchExpanded;
-    
+
     if (newExpanded) {
       // When expanding: first move down and shift content, then set expanded state for horizontal animation
       Animated.parallel([
@@ -146,8 +148,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   };
 
   const isTablet = dimensions.width > 600;
-
-  // Remove the useEffect since animation is now handled in handleSearchToggle
 
   const renderTodoItem: ListRenderItem<Todo> = ({ item }) => (
     <TodoItem
@@ -200,6 +200,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   };
 
+  const buttonStyle = {
+    paddingVertical: 0
+  }
+
   return (
     <View
       style={[
@@ -217,7 +221,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         onMenuPress={() => navigation.openDrawer()}
       />
 
-      <View style={styles.filtersContainer}>
+      <View style={[styles.filtersContainer, { paddingHorizontal: spacing(16), paddingBottom: spacing(24) }]}>
         <Animated.View
           style={[
             styles.filters,
@@ -235,26 +239,30 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         >
           <SegmentedButtons
             value={filter}
+            density={isMac ? 'high' : 'regular'}
             onValueChange={(value) => handleFilterPress(value as FilterType)}
             buttons={[
               {
                 value: 'today',
                 label: 'Today',
+                style: buttonStyle
               },
               {
                 value: 'all',
                 label: 'All',
+                style: buttonStyle
               },
               {
                 value: 'done',
                 label: 'Done',
+                style: buttonStyle
               },
             ]}
             style={styles.segmentedButtons}
           />
         </Animated.View>
 
-        <Animated.View 
+        <Animated.View
           style={[
             styles.searchIconContainer,
             {
@@ -302,13 +310,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             renderItem={renderTodoItem}
             keyExtractor={keyExtractor}
             style={styles.list}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={handleRefresh}
-                colors={[theme.colors.primary]}
-              />
-            }
             removeClippedSubviews={false}
             maxToRenderPerBatch={10}
             windowSize={10}
@@ -320,7 +321,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         icon="plus"
         mode="flat"
         color={theme.colors.onPrimary}
-        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        style={[styles.fab, { backgroundColor: theme.colors.primary, bottom: spacing(32) }]}
         onPress={handleAddTodo}
         accessibilityLabel="Add new todo"
       />
@@ -347,8 +348,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   filtersContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 24,
+    // paddingHorizontal and paddingBottom are now applied dynamically with spacing()
     position: 'relative',
   },
   contentContainer: {
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
   },
   segmentedButtons: {
     flex: 1,
-    maxWidth: 320,
+    maxWidth: 320
   },
   searchIconContainer: {
     position: 'absolute',
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 32,
+    // bottom is now applied dynamically with spacing()
     left: '50%',
     marginLeft: -28,
     borderRadius: 28,

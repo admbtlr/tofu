@@ -59,6 +59,11 @@ export default function TodoEditor({
   const [listId, setListId] = useState<string>(todo?.listId || selectedListId || '');
   const [showListMenu, setShowListMenu] = useState(false);
 
+  // Check if running on Mac (Catalyst) - Mac Catalyst doesn't support native iOS date picker
+  // @ts-ignore - interfaceIdiom might not be in types but exists on Mac Catalyst
+  const isMac = Platform.OS === 'ios' &&
+    (Platform.constants?.interfaceIdiom === 'mac' || Platform.constants?.isMacCatalyst);
+
   useEffect(() => {
     const titleValidation = validateTodoTitle(title);
     setTitleError(titleValidation);
@@ -177,7 +182,7 @@ export default function TodoEditor({
             <Text variant="titleMedium">Due Date</Text>
           </View>
 
-          {Platform.OS === 'ios' ? (
+          {(Platform.OS === 'ios' && !isMac) ? (
             <View style={[styles.datePickerContainer]}>
               <DateTimePicker
                 value={dueDate || new Date()}
@@ -254,7 +259,7 @@ export default function TodoEditor({
           </View>
 
           {includeTime && (
-            Platform.OS === 'ios' ? (
+            (Platform.OS === 'ios' && !isMac) ? (
               <View style={styles.datePickerContainer}>
                 <DateTimePicker
                   value={dueDate || new Date()}

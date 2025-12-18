@@ -1,3 +1,4 @@
+import { isMac, spacing } from '@/app/theme/theme';
 import { useTodoStore } from '@/store/useTodoStore';
 import { Todo } from '@/types/todo';
 import { formatDate, formatTime, isOverdue } from '@/utils/date';
@@ -43,7 +44,7 @@ export default React.memo(function TodoItem({
     if (justCompleted && filter !== 'done') {
       // Show greyed out state immediately
       opacity.value = withSpring(0.5);
-      scale.value = withSpring(0.98);
+      // scale.value = withSpring(0.98);
 
       // After 3 seconds, animate out and remove
       removalTimerRef.current = setTimeout(() => {
@@ -167,7 +168,10 @@ export default React.memo(function TodoItem({
         <List.Item
           title={todo.title}
           titleStyle={titleStyle}
-          contentStyle={{ marginLeft: -10 }}
+          contentStyle={{
+            marginLeft: isMac ? -16 : -10,
+            marginTop: isMac ? 4 : 2
+          }}
           description={
             <View style={styles.description}>
               {todo.notes && (
@@ -211,7 +215,7 @@ export default React.memo(function TodoItem({
               iconColor={
                 todo.completed ? theme.colors.primary : theme.colors.onSurface
               }
-              size={24}
+              size={isMac ? 18 : 24}
               onPress={handleToggleComplete}
               style={styles.checkbox}
             />
@@ -243,7 +247,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   title: {
-    fontSize: 16,
+    fontSize: isMac ? 14 : 16,
     lineHeight: 22,
     opacity: 0.9,
   },
@@ -280,6 +284,6 @@ const styles = StyleSheet.create({
   },
   checkbox: {
     margin: 0,
-    marginTop: -8,
+    marginTop: 0,
   },
 });

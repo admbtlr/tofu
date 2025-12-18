@@ -5,7 +5,7 @@ import HomeScreen from '@/screens/HomeScreen';
 import EditTodoScreen from '@/screens/EditTodoScreen';
 import ListDrawer from '@/components/ListDrawer';
 import { TodoId } from '@/types/todo';
-import { Dimensions, useWindowDimensions } from 'react-native';
+import { Dimensions, useWindowDimensions, Platform } from 'react-native';
 
 export type RootStackParamList = {
   Home: undefined;
@@ -31,6 +31,11 @@ function StackNavigator() {
 
 export default function RootNavigator() {
   const width = useWindowDimensions().width;
+
+  // Check if running on Mac (Catalyst) for vibrancy effect
+  // @ts-ignore - interfaceIdiom might not be in types but exists on Mac Catalyst
+  const isMac = Platform.OS === 'ios' && (Platform.constants?.interfaceIdiom === 'mac' || Platform.constants?.isMacCatalyst);
+
   return (
     <Drawer.Navigator
       drawerContent={props => <ListDrawer {...props} />}
@@ -38,8 +43,13 @@ export default function RootNavigator() {
         headerShown: false,
         drawerType: width > 900 ? 'permanent' : 'slide',
         drawerStyle: {
-          width: width > 900 ? 300 : '100%',
+          width: width > 900 ? 250 : '100%',
+          backgroundColor: isMac ? 'transparent' : undefined,
+          borderRightColor: 'rgba(255,255,255,0.1)'
         },
+        sceneContainerStyle: isMac ? {
+          backgroundColor: 'transparent',
+        } : undefined,
       }}
     >
       <Drawer.Screen name="Main" component={StackNavigator} />

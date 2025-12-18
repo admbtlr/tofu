@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Platform } from 'react-native';
 import {
   List,
   IconButton,
@@ -16,6 +16,8 @@ import { useListStore } from '@/store/useListStore';
 import { EVERYTHING_LIST_ID } from '@/types/list';
 import { useTodoStore } from '@/store/useTodoStore';
 import Header from './Header';
+import { isMac, scaleFontForMac, spacing } from '@/app/theme/theme';
+
 export default function ListDrawer(props: DrawerContentComponentProps) {
   const theme = useTheme();
   const { lists, selectedListId, setSelectedList, addList, deleteList } =
@@ -84,27 +86,33 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.surface }}>
+    <View style={{ flex: 1, backgroundColor: isMac ? 'transparent' : theme.colors.surface }}>
       <DrawerContentScrollView
         {...props}
-        style={styles.drawerSection}
+        style={[styles.drawerSection, isMac && { backgroundColor: 'transparent' }]}
         contentContainerStyle={{ flexGrow: 1 }}
       >
         {/* Everything entry */}
         <List.Item
           title={getLabel(EVERYTHING_LIST_ID)}
+          titleStyle={styles.titleStyle}
           left={props => (
             <List.Icon
               {...props}
               color={theme.colors.primary}
               icon="inbox-multiple"
+              style={{
+                marginLeft: 16,
+                marginRight: -8
+              }}
             />
           )}
           onPress={() => handleSelectList(EVERYTHING_LIST_ID)}
           style={[
             styles.listItem,
+            isMac && { backgroundColor: 'transparent' },
             selectedListId === EVERYTHING_LIST_ID && {
-              backgroundColor: theme.colors.secondaryContainer,
+              backgroundColor: isMac ? 'rgba(255, 255, 255, 0.1)' : theme.colors.secondaryContainer,
             },
           ]}
         />
@@ -114,11 +122,16 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
           <List.Item
             key={list.id}
             title={getLabel(list.id)}
+            titleStyle={styles.titleStyle}
             left={props => (
               <List.Icon
                 {...props}
                 color={theme.colors.primary}
                 icon="format-list-bulleted"
+                style={{
+                  marginLeft: 16,
+                  marginRight: -8
+                }}
               />
             )}
             right={() => (
@@ -131,6 +144,7 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
                     style={{
                       padding: 0,
                       margin: 0,
+                      marginRight: -16,
                       height: 24
                     }}
                   />
@@ -140,8 +154,9 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
             onPress={() => handleSelectList(list.id)}
             style={[
               styles.listItem,
+              isMac && { backgroundColor: 'transparent' },
               selectedListId === list.id && {
-                backgroundColor: theme.colors.secondaryContainer,
+                backgroundColor: isMac ? 'rgba(255, 255, 255, 0.1)' : theme.colors.secondaryContainer,
               },
             ]}
           />
@@ -149,14 +164,14 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
       </DrawerContentScrollView>
 
       {/* Add new list button - now at the bottom */}
-      <View style={[styles.addListContainer, { backgroundColor: theme.colors.surface }]}>
+      <View style={[styles.addListContainer, { backgroundColor: isMac ? 'transparent' : theme.colors.surface }]}>
         <List.Item
           title="Add List"
           left={props => (
             <List.Icon {...props} color={theme.colors.primary} icon="plus" />
           )}
           onPress={() => setAddDialogVisible(true)}
-          style={styles.listItem}
+          style={[styles.listItem, isMac && { backgroundColor: 'transparent' }]}
         />
       </View>
 
@@ -197,6 +212,7 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
             setAddDialogVisible(false);
             setNewListName('');
           }}
+          style={ styles.dialogStyle }
         >
           <Dialog.Title>New List</Dialog.Title>
           <Dialog.Content>
@@ -234,7 +250,14 @@ const styles = StyleSheet.create({
     paddingTop: 32,
   },
   listItem: {
-    paddingVertical: 8,
+    // padding: spacing(4),
+    margin: isMac ? 2 : 4,
+    marginHorizontal: spacing(16),
+    paddingVertical: isMac ? 2 : 12,
+    borderRadius: 8,
+  },
+  titleStyle: {
+    fontSize: isMac ? 14 : 16
   },
   rightContainer: {
     flexDirection: 'row',
@@ -255,6 +278,9 @@ const styles = StyleSheet.create({
   addListContainer: {
     borderTopWidth: 1,
     borderTopColor: 'rgba(0, 0, 0, 0.12)',
-    paddingBottom: 32,
+    paddingBottom: isMac ? 0 : 32,
   },
+  dialogStyle: {
+    maxWidth: 400
+  }
 });
