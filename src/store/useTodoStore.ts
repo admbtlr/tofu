@@ -79,12 +79,12 @@ const filterTodos = (
 
   switch (filter) {
     case 'today':
-      // Show uncompleted todos that are due today or earlier, or have no due date
+      // Show uncompleted todos that are due today or earlier
       // Also show todos that are pending removal (animating out)
       filtered = filtered.filter(todo => {
         if (pendingRemovalIds.has(todo.id)) return true;
         if (todo.completed) return false;
-        if (!todo.dueDate) return true;
+        if (!todo.dueDate) return false;
         const dueDate = new Date(todo.dueDate);
         return dueDate <= now;
       });
