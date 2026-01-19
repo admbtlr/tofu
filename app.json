@@ -21,6 +21,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#E46B1A"
       },
+     "edgeToEdgeEnabled": true,
       "package": "eu.btlr.tofu"
     },
     "web": {
