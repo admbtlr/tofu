@@ -28,12 +28,9 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
   const [addDialogVisible, setAddDialogVisible] = useState(false);
   const [newListName, setNewListName] = useState('');
 
-  console.log('ListDrawer render - selectedListId:', selectedListId);
-  console.log('secondaryContainer color:', theme.colors.secondaryContainer);
-
   const handleSelectList = (listId: string) => {
     setSelectedList(listId);
-    // props.navigation.closeDrawer();
+    props.navigation.closeDrawer();
   };
 
   const handleDeletePress = (listId: string) => {
@@ -96,92 +93,74 @@ export default function ListDrawer(props: DrawerContentComponentProps) {
         contentContainerStyle={{ flexGrow: 1 }}
       >
         {/* Everything entry */}
-        <View style={[
-          styles.listItem,
-          selectedListId === EVERYTHING_LIST_ID && {
-            backgroundColor: isMac ? 'rgba(255, 255, 255, 0.1)' : theme.colors.secondaryContainer,
-          },
-        ]}>
+        <List.Item
+          title={getLabel(EVERYTHING_LIST_ID)}
+          titleStyle={styles.titleStyle}
+          left={props => (
+            <List.Icon
+              {...props}
+              color={theme.colors.primary}
+              icon="inbox-multiple"
+              style={{
+                marginLeft: 16,
+                marginRight: -8
+              }}
+            />
+          )}
+          onPress={() => handleSelectList(EVERYTHING_LIST_ID)}
+          style={[
+            styles.listItem,
+            isMac && { backgroundColor: 'transparent' },
+            selectedListId === EVERYTHING_LIST_ID && {
+              backgroundColor: isMac ? 'rgba(255, 255, 255, 0.1)' : theme.colors.secondaryContainer,
+            },
+          ]}
+        />
+
+        {/* User's lists */}
+        {lists.map(list => (
           <List.Item
-            title={getLabel(EVERYTHING_LIST_ID)}
+            key={list.id}
+            title={getLabel(list.id)}
             titleStyle={styles.titleStyle}
             left={props => (
               <List.Icon
                 {...props}
                 color={theme.colors.primary}
-                icon="inbox-multiple"
+                icon="format-list-bulleted"
                 style={{
                   marginLeft: 16,
                   marginRight: -8
                 }}
               />
             )}
-            onPress={() => handleSelectList(EVERYTHING_LIST_ID)}
-            style={{
-              backgroundColor: selectedListId === EVERYTHING_LIST_ID
-                ? 'rgba(0, 0,0, 0.1)'
-                : 'transparent',
-            }}
-          />
-        </View>
-
-        {/* User's lists */}
-        {lists.map(list => {
-          const isSelected = selectedListId === list.id;
-          const bgColor = isSelected ? (isMac ? 'rgba(255, 255, 255, 0.1)' : theme.colors.secondaryContainer) : 'transparent';
-          console.log(`List ${list.name} (${list.id}) - isSelected: ${isSelected}, bgColor: ${bgColor}`);
-          return (
-          <View
-            key={list.id}
+            right={() => (
+              <View style={styles.rightContainer}>
+                {!list.isDefault && (
+                  <IconButton
+                    icon="delete-outline"
+                    size={20}
+                    onPress={() => handleDeletePress(list.id)}
+                    style={{
+                      padding: 0,
+                      margin: 0,
+                      marginRight: -16,
+                      height: 24
+                    }}
+                  />
+                )}
+              </View>
+            )}
+            onPress={() => handleSelectList(list.id)}
             style={[
               styles.listItem,
-              {
-                backgroundColor: bgColor,
-                overflow: 'hidden',
+              isMac && { backgroundColor: 'transparent' },
+              selectedListId === list.id && {
+                backgroundColor: isMac ? 'rgba(255, 255, 255, 0.1)' : theme.colors.secondaryContainer,
               },
             ]}
-          >
-            <List.Item
-              title={getLabel(list.id)}
-              titleStyle={styles.titleStyle}
-              left={props => (
-                <List.Icon
-                  {...props}
-                  color={theme.colors.primary}
-                  icon="format-list-bulleted"
-                  style={{
-                    marginLeft: 16,
-                    marginRight: -8
-                  }}
-                />
-              )}
-              right={() => (
-                <View style={styles.rightContainer}>
-                  {!list.isDefault && (
-                    <IconButton
-                      icon="delete-outline"
-                      size={20}
-                      onPress={() => handleDeletePress(list.id)}
-                      style={{
-                        padding: 0,
-                        margin: 0,
-                        marginRight: -16,
-                        height: 24
-                      }}
-                    />
-                  )}
-                </View>
-              )}
-              onPress={() => handleSelectList(list.id)}
-              style={{
-                backgroundColor: selectedListId === list.id
-                  ? 'rgba(0, 0,0, 0.1)'
-                  : 'transparent',
-                }}
-            />
-          </View>
-        );
-        })}
+          />
+        ))}
       </DrawerContentScrollView>
 
       {/* Add new list button - now at the bottom */}

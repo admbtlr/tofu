@@ -70,7 +70,7 @@ export const lightTheme: MD3Theme = {
     background: 'rgb(245, 245, 240)',
     surface: 'rgb(225, 225, 220)',
     onSurface: 'rgb(60, 30, 10)',
-    secondaryContainer: 'rgb(210, 195, 185)',
+    secondaryContainer: 'rgb(230, 215, 205)',
     onSurfaceVariant: 'rgb(60, 30, 60)',
   },
   fonts: {
@@ -95,7 +95,6 @@ export const darkTheme: MD3Theme = {
     outlineVariant: 'rgb(68, 71, 78)',
     background: 'rgb(36, 36, 38)',
     onBackground: 'rgb(227, 226, 230)',
-    secondaryContainer: 'rgb(45, 45, 48)',
   },
   fonts: {
     ...MD3DarkTheme.fonts,
